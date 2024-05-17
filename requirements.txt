@@ -1,0 +1,4 @@
+flet~=0.22.0
+python-dotenv~=1.0.1
+SQLAlchemy~=2.0.29
+Werkzeug~=3.0.2
