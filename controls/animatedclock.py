@@ -1,17 +1,21 @@
 import time
+import random
 from math import pi
-
-from flet import *
+from flet import (Stack,
+                  Container,
+                  Image,
+                  ImageFit,
+                  AnimationCurve,
+                  animation,
+                  transform,
+                  alignment)
 
 
 class AnimatedLock(Stack):
     def __init__(self, rotate_angle):
         super().__init__()
         self.rotate_angle = rotate_angle
-
-    def build(self) -> Stack:
-        return Stack(
-            controls=[
+        self.controls = [
                 Container(
                     content=Image(
                         src="assets/Lock_frame.png",
@@ -35,15 +39,14 @@ class AnimatedLock(Stack):
                     animate_rotation=animation.Animation(700, AnimationCurve.EASE_IN_OUT)
                 )
             ]
-        )
 
     def animate_lock(self):
         clock_wise_rotate = pi / 4
-        lock = self.controls[0].controls[1]
+        lock = self.controls[1]
         counter = 0
         if counter == 0:
             while True:
-                if 0 <= counter <= 4:
+                if 0 <= counter <= 3:
                     lock.rotate = transform.Rotate(
                         clock_wise_rotate, alignment=alignment.center
                     )
@@ -53,7 +56,7 @@ class AnimatedLock(Stack):
                     counter += 1
                     time.sleep(0.9)
 
-                if 5 <= counter <= 10:
+                if 4 <= counter <= 8:
                     lock.rotate = transform.Rotate(
                         clock_wise_rotate, alignment=alignment.center
                     )
@@ -62,6 +65,6 @@ class AnimatedLock(Stack):
                     clock_wise_rotate -= pi / 2
                     counter += 1
                     time.sleep(0.9)
-                if counter > 10:
+                if counter > 8:
                     counter = 0
 

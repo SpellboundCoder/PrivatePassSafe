@@ -1,116 +1,135 @@
 from typing import Any
-
 from flet import *
-
 from core.dictionary import *
 
-WINDOW_WIDTH = 420
-WINDOW_HEIGHT = 740
 
 # window_style
-window_style: dict[str, Any] = {
-        'width': 420,
-        'height': 740,
-        'padding': 10
-}
-gradient: dict[str, Any] = {
+AppStyle: dict[str, dict[str, Any]] = {
+    'login/register_window': {
+        'padding': 15,
+        'expand': True
+    },
+    'window': {
+        'padding': 10,
+        'expand': True
+    },  # GRADIENT
+    'gradient': {
         'begin': alignment.top_center,
         'end': alignment.bottom_center,
         'colors': ['#211951', colors.BLACK87]
-}
-# Login_title
-login_title_margin = margin.only(top=230)
-login_title_color: str = "#ffffff"
-
-# login_error
-login_error_color: str = '#ff0000'
-login_error_bg: str = '#1e1c20'
-
-# Form_Style
-form_style: dict[str, Any] = {
-        'padding': 15,
-        'width': 400,
-        'height': 450,
-        'bgcolor': colors.TRANSPARENT,
-        'border': border.all(4, 'transparent'),
-        'border_radius': 10,
-        'margin': margin.only(top=5),
-}
-# Tabs style
-tabs_style: dict[str, Any] = {
-        'width': 400,
-        'height': 445,
-        'margin': margin.only(top=215),
-        'alignment': alignment.center
-}
-# input style
-input_textfield_style = {
+    },  # LOGIN
+    'snack_bar': {
+        'bgcolor': colors.RED,
+        # 'action_color': colors.RED
+    },  # Form
+    'form': {
+        'padding': padding.only(15, right=15),
+        # 'bgcolor': colors.TRANSPARENT,
+        # 'border': border.all(4, colors.TRANSPARENT),
+        'expand': True,
+    },  # INPUT TEXTFIELD
+    'input_textfield': {
         'bgcolor': '#1d1b1f',
-        'width': 340,
-        'height': 40,
-        'border_color': '#272627',
+        'border_color': colors.BLACK87,
         'border': 2,
         'border_radius': 10,
         'color': colors.WHITE,
-        'text_size': 14,
-        'focused_border_color': '#211951',
-}
-# ElevatedButton   # 'button_border': BorderSide(3, "#272627"), # '#211C6A'
-ElevatedButton_Style: dict[str, Any] = {
-        'width':  250,
-        'height':  40,
-        'style': ButtonStyle(
-                color=colors.WHITE,
-                bgcolor=colors.DEEP_PURPLE_ACCENT_700,
+        'text_size': 18,
+        'focused_border_color': colors.INDIGO,
+        'text_vertical_align': -0.2,
+        'content_padding': 0,
+        'height': 50,
+        'expand': True
+    },  # Password  Field
+    'password_field': {
+        'multiline': True,
+        'max_lines': 2,
+        'min_lines': 1,
+        'height': 80,
+        'text_align': TextAlign.CENTER,
+        'content_padding': 10,
+        'bgcolor': '#1d1b1f',
+        'border_color': colors.BLACK87,
+        'border': 4,
+        'border_radius': 10,
+        'color': colors.WHITE,
+        'text_size': 22,
+        'focused_border_color': colors.DEEP_PURPLE_ACCENT_700,
+        'text_style': TextStyle(
+            weight=FontWeight.BOLD
         )
-}
-
-# bottom_Appbar
-appbar_style: dict = {
+    },
+    'chip': {
+        'bgcolor': colors.BLUE_GREY_800,
+        'selected_color': colors.DEEP_PURPLE_ACCENT_700,
+        'show_checkmark': False,
+    },
+    # ElevatedButton
+    'loginButton': {
+        # 'expand': True,
+        'height': 45,
+        'width': 300,
+        'style': ButtonStyle(
+            color=colors.WHITE,
+            bgcolor=colors.DEEP_PURPLE_ACCENT_700,
+        )
+    },
+    'cancelButton': {
+        'height': 45,
+        'width': 300,
+        'style': ButtonStyle(
+            color=colors.WHITE,
+            bgcolor=colors.RED_ACCENT_700,
+        )
+    },
+    'signupButton': {
+        'height': 45,
+        'width': 300,
+        'style': ButtonStyle(
+            color=colors.WHITE,
+            bgcolor=colors.GREY,
+        )
+    },
+    # bottom_Appbar
+    'appbar': {
         'shape': NotchShape.AUTO,
         'bgcolor': colors.BLACK87,
-        'height': 60,
-        'padding': padding.only(10, 0, 10, 5),
-}
-
-# SearchBar
-search_bar_style: dict[str, Any] = {
-        'view_elevation': 4,
-        'width': 365,
+        'height': 50,
+        'padding': padding.only(10, 0, 10, 0),
+    },  # SearchBar
+    'search_bar': {
+        'view_elevation': 0,
+        # 'expand': False,
         'height': 40,
         'divider_color': colors.BLACK,
         'bar_hint_text': dic_searchbar_bar_hint_text,
-        'view_hint_text': dic_searchbar_view_hint_text,
-}
-
-# FloatingActionButton
-floating_button: dict[str, Any] = {
+        # 'view_hint_text': dic_searchbar_view_hint_text,
+    },  # FloatingActionButton
+    'floating_button': {
         'height': 55,
         'width': 55,
         'bgcolor': colors.DEEP_PURPLE_ACCENT_700,
         'icon': icons.ADD,
-}
-# List Tiles
-listTiles: dict[str, Any] = {
+    },  # List Tiles
+    'listTiles': {
         'bgcolor': colors.BLACK38,
         'hover_color': colors.DEEP_PURPLE_ACCENT_400,
         'shape': RoundedRectangleBorder(radius=15),
-}
-
-# Column for Tiles
-columnTiles: dict[str, Any] = {
-        'height': 400,
-        'width': 350,
+        'adaptive': False
+    },  # Column for Tiles
+    'columnTiles': {
+        # 'height': 400,
+        # 'width': 350,
         'spacing': 15,
-
-}
-
-# ListTiles Wrapper(container)
-listTilesCard: dict[str, Any] = {
+    },  # ListTiles Wrapper(container)
+    'listTilesCard': {
+        'expand': True,
         'height': 400,
-        'width': 380,
-        'bottom': 130,
+        # 'width': 380,
         'variant': CardVariant.OUTLINED,
-        # 'color': '#211951'
+    },  # Switch
+    'switch': {
+        'active_color': colors.DEEP_PURPLE_ACCENT_700,
+        'adaptive': True,
+    }
 }
-

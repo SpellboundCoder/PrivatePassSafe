@@ -1,56 +1,88 @@
 from flet import *
-
-from controls import (UserSearchBar,
-                      UserListTile)
-from core import *
+from controls import UserSearchBar, UserListTile
+from core import AppStyle
 
 
 class HomePage(Container):
-    def __init__(self, home_page: Page):
-        super().__init__(**window_style)
-        self.searchBar = UserSearchBar()
+    def __init__(self, home_page: Page, session):
+        super().__init__(**AppStyle['window'])
+        self._session = session
+        self.page = home_page
+        self.gradient = LinearGradient(**AppStyle['gradient'])
+        self.searchBar = UserSearchBar(lambda e: self.filter_tiles(e))
         self.listTiles = UserListTile()
         self.chips = [
+
             Chip(
-                label=Text("Save to favourites"),
+                **AppStyle['chip'],
+                label=Text('All'),
+                on_select=self.chip_selected,
+                leading=Icon(icons.ALL_INBOX),
+                selected=True,
+            ),
+            Chip(
+                **AppStyle['chip'],
+                label=Text("Favourites"),
                 leading=Icon(icons.FAVORITE_BORDER_OUTLINED),
-                bgcolor=colors.GREEN_200,
-                disabled_color=colors.BLACK,
-                autofocus=False,
                 on_select=self.chip_selected,
             ),
             Chip(
-                label=Text('test2'),
-                bgcolor=colors.GREEN_900,
-                disabled_color=colors.BLACK,
-                autofocus=False,
+                **AppStyle['chip'],
+                label=Text('Social Media'),
+                leading=Icon(icons.SOCIAL_DISTANCE),
                 on_select=self.chip_selected,
-                show_checkmark=False,
-                click_elevation=20
+            ),
+            Chip(
+                **AppStyle['chip'],
+                label=Text('Work'),
+                leading=Icon(icons.WORK),
+                on_select=self.chip_selected,
+            ),
+            Chip(
+                **AppStyle['chip'],
+                label=Text('test'),
+                leading=Icon(icons.SOCIAL_DISTANCE),
+                on_select=self.chip_selected,
             )
         ]
-        self.gradient = LinearGradient(**gradient)
-        self.content = Stack(
+
+        self.content = Column(
             controls=[
+                Text(value='PrivatePassSafe', color=colors.WHITE, size=25, weight=FontWeight.BOLD),
                 Container(
-                    content=Row(
-                        [
-                         self.searchBar,
-                         ],
-                        alignment=MainAxisAlignment.SPACE_BETWEEN),
-                    padding=padding.only(10, top=20, right=10),
+                    content=self.searchBar,
+                    padding=padding.only(10, right=10),
                     ),
-                Row(controls=self.chips, top=100, left=100),
-                self.listTiles]
+                Container(
+                    content=Row(controls=self.chips,
+                                scroll=ScrollMode.HIDDEN,
+                                spacing=15),
+                    padding=padding.only(left=10, right=10, top=10)),
+
+                self.listTiles,
+
+                ],
         )
 
-    def show_searchbar(self):
-        if self.searchBar.controls[0].opacity == 0:
-            self.searchBar.controls[0].opacity = 1
-            self.searchBar.controls[0].update()
-        else:
-            self.searchBar.controls[0].opacity = 0
-            self.searchBar.controls[0].update()
-
     def chip_selected(self, e):
+        if e.control.label.value == 'All':
+            for _chip in self.chips:
+                if _chip.label.value != 'All':
+                    _chip.selected = False
+        else:
+            self.chips[0].selected = False
         self.page.update()
+
+    def filter_tiles(self, e):
+        if e.data:
+            for tile in self.listTiles.tiles:
+                tile.visible = (
+                    True
+                    if e.data in tile.title.value
+                    else False
+                )
+                self.listTiles.update()
+        else:
+            for tile in self.listTiles.tiles:
+                tile.visible = True
+                self.listTiles.update()
