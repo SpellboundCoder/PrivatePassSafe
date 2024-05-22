@@ -59,7 +59,6 @@ class Register(Container):
         )
         self.register_button = ElevatedButton(
             **AppStyle['signupButton'],
-            text=dic_register_button,
             disabled=True,
             on_click=lambda e: self.register(),
         )

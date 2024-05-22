@@ -47,7 +47,6 @@ class Login(Container):
         )
         self.login_button = ElevatedButton(
             **AppStyle['loginButton'],
-            text=dic_login_button,
             on_click=lambda e: self.login_auth(),
         )
         self.login_error = SnackBar(

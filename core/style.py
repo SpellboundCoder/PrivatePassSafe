@@ -24,8 +24,6 @@ AppStyle: dict[str, dict[str, Any]] = {
     },  # Form
     'form': {
         'padding': padding.only(15, right=15),
-        # 'bgcolor': colors.TRANSPARENT,
-        # 'border': border.all(4, colors.TRANSPARENT),
         'expand': True,
     },  # INPUT TEXTFIELD
     'input_textfield': {
@@ -66,7 +64,7 @@ AppStyle: dict[str, dict[str, Any]] = {
     },
     # ElevatedButton
     'loginButton': {
-        # 'expand': True,
+        'text': 'Login',
         'height': 45,
         'width': 300,
         'style': ButtonStyle(
@@ -75,6 +73,7 @@ AppStyle: dict[str, dict[str, Any]] = {
         )
     },
     'cancelButton': {
+        'text': 'Cancel',
         'height': 45,
         'width': 300,
         'style': ButtonStyle(
@@ -82,15 +81,24 @@ AppStyle: dict[str, dict[str, Any]] = {
             bgcolor=colors.RED_ACCENT_700,
         )
     },
+    'submitButton': {
+        'text': 'Submit',
+        'height': 45,
+        'width': 300,
+        'style': ButtonStyle(
+            color=colors.WHITE,
+            bgcolor=colors.DEEP_PURPLE_ACCENT_700,
+        )
+    },
     'signupButton': {
+        'text': 'Submit',
         'height': 45,
         'width': 300,
         'style': ButtonStyle(
             color=colors.WHITE,
             bgcolor=colors.GREY,
         )
-    },
-    # bottom_Appbar
+    },  # bottom_Appbar
     'appbar': {
         'shape': NotchShape.AUTO,
         'bgcolor': colors.BLACK87,
@@ -118,8 +126,6 @@ AppStyle: dict[str, dict[str, Any]] = {
         'adaptive': False
     },  # Column for Tiles
     'columnTiles': {
-        # 'height': 400,
-        # 'width': 350,
         'spacing': 15,
     },  # ListTiles Wrapper(container)
     'listTilesCard': {
@@ -130,6 +136,36 @@ AppStyle: dict[str, dict[str, Any]] = {
     },  # Switch
     'switch': {
         'active_color': colors.DEEP_PURPLE_ACCENT_700,
-        'adaptive': True,
-    }
+        # 'value': False
+    },
+    'dropdown': {
+        'bgcolor': '#1d1b1f',
+        'border_color': colors.BLACK87,
+        'border': 2,
+        'border_radius': 10,
+        'color': colors.WHITE,
+        'height': 50,
+        'expand': True,
+        'content_padding': padding.only(bottom=5, left=10),
+        'text_style': TextStyle(size=20)
+    },
+    'addButton': {
+        'text': 'add',
+        'height': 40,
+        'expand': True,
+        'style': ButtonStyle(
+            color=colors.WHITE,
+            bgcolor=colors.DEEP_PURPLE_ACCENT_700,
+        )
+    },
+    'deleteButton': {
+        'text': 'delete',
+        'height': 40,
+        'expand': True,
+        'style': ButtonStyle(
+            color=colors.WHITE,
+            bgcolor=colors.RED_ACCENT_700,
+        )
+    },
+
 }
