@@ -9,16 +9,21 @@ from flet import (Container,
                   FontWeight,
                   MainAxisAlignment,
                   Page,
+                  TextSpan,
+                  TextStyle,
+                  TextDecoration,
+                  Divider,
                   colors,
                   icons,
                   alignment,
-                  padding)
+                  )
 from controls import AnimatedLock, EmailRow
-from core import AppStyle
-from core.dictionary import *
+from core import AppStyle, dict_en
 from math import pi
 from werkzeug.security import generate_password_hash
 from data.dbconfig import User
+
+dictionary = dict_en['Register']
 
 
 class Register(Container):
@@ -34,7 +39,7 @@ class Register(Container):
         self.register_username = TextField(
             **AppStyle['input_textfield'],
             prefix_icon=icons.ADMIN_PANEL_SETTINGS,
-            label=dic_input_register_username,
+            label=dictionary['username'],
             on_focus=lambda e: self.activate_lock(),
             on_change=lambda e: self.validate()
         )
@@ -42,7 +47,7 @@ class Register(Container):
 
         self.register_password = TextField(
             **AppStyle['input_textfield'],
-            label=dic_input_register_password,
+            label=dictionary['password'],
             prefix_icon=icons.LOCK,
             password=True,
             can_reveal_password=True,
@@ -51,7 +56,7 @@ class Register(Container):
         )
         self.register_confirm_password = TextField(
             **AppStyle['input_textfield'],
-            label=dic_input_register_confirm_password,
+            label=dictionary['confirm_password'],
             prefix_icon=icons.LOCK,
             password=True,
             can_reveal_password=True,
@@ -63,7 +68,7 @@ class Register(Container):
             on_click=lambda e: self.register(),
         )
         self.register_error = SnackBar(
-            Text(dic_register_error, color=colors.WHITE),
+            Text(dictionary['error'], color=colors.WHITE),
             **AppStyle['snack_bar'])
 
         self.content = Column(
@@ -72,13 +77,12 @@ class Register(Container):
                         content=self.lock,
                         alignment=alignment.center,
                 ),
-                Row(
-                    controls=[
-                        Text(
-                            value='Welcome to PrivatePassSafe!',
-                            size=22,
-                            weight=FontWeight.BOLD),
-                        ],
+                Row([
+                    Text(
+                        value='Welcome to PrivatePassSafe!',
+                        size=22,
+                        weight=FontWeight.BOLD),
+                    ],
                     alignment=MainAxisAlignment.CENTER),
 
                 Container(
@@ -87,7 +91,20 @@ class Register(Container):
                         self.register_email,
                         Row([self.register_password,]),
                         Row([self.register_confirm_password,]),
-                        Row([self.register_button], alignment=MainAxisAlignment.CENTER)
+                        Row([self.register_button], alignment=MainAxisAlignment.CENTER),
+                        Divider(height=20, color=colors.TRANSPARENT),
+                        Row([Text("Back to ", size=15,
+                             spans=[
+                                 TextSpan(
+                                     text='Login...',
+                                     on_click=lambda s: self.to_login(),
+                                     style=TextStyle(
+                                         italic=True,
+                                         decoration=TextDecoration.UNDERLINE,
+                                         size=16)
+                                     )
+                                 ])
+                             ], alignment=MainAxisAlignment.CENTER)
                         ],
                         spacing=10),
                     **AppStyle['form']
@@ -108,8 +125,9 @@ class Register(Container):
                                 )
                 self._session.add(new_user)
                 self._session.commit()
-                self.page.session.set(key="logged_in", value=user.username)
-                self.page.go(f'{self.page.session.get('logged_in')}/dashboard')
+                self.page.session.set(key="username", value=self.register_username.value)
+                self.page.session.set(key="email", value=self.register_email.controls[0].value)
+                self.page.go(f'/home')
             else:
                 self.register_error.open = True
                 self.register_error.update()
@@ -133,3 +151,6 @@ class Register(Container):
         if not self.activated_lock:
             self.activated_lock = True
             self.lock.animate_lock()
+
+    def to_login(self):
+        self.page.go('/login')

@@ -20,9 +20,11 @@ from flet import (Page,
                   ScrollMode)
 from werkzeug.security import check_password_hash
 from controls import AnimatedLock, EmailRow
-from core import AppStyle
-from core.dictionary import *
+from core import AppStyle, dict_en
 from data.dbconfig import User
+from time import sleep
+
+dictionary = dict_en['Login']
 
 
 class Login(Container):
@@ -39,7 +41,7 @@ class Login(Container):
 
         self.login_password = TextField(
             **AppStyle['input_textfield'],
-            label=dic_input_login_password,
+            label=dictionary['password'],
             prefix_icon=icons.LOCK,
             password=True,
             can_reveal_password=True,
@@ -50,7 +52,7 @@ class Login(Container):
             on_click=lambda e: self.login_auth(),
         )
         self.login_error = SnackBar(
-            Text(dic_login_error, color=colors.WHITE),
+            Text(dictionary['error'], color=colors.WHITE),
             **AppStyle['snack_bar']
         )
 
@@ -122,10 +124,11 @@ class Login(Container):
         user = self.session.query(User).filter_by(email=email).one_or_none()
         if user:
             if check_password_hash(user.password, password):
-                self.page.session.set(key="logged_in", value=user.username)
-                self.page.go(
-                    f'{user.username}/dashboard'
-                )
+                self.page.session.set(key="username", value=user.username)
+                self.page.session.set(key="email", value=user.email)
+                self.lock.stop_animation()
+                sleep(0.5)
+                self.page.go('/home')
             else:
                 self.login_error.open = True
                 self.login_error.update()

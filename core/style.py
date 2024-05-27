@@ -1,7 +1,5 @@
 from typing import Any
 from flet import *
-from core.dictionary import *
-
 
 # window_style
 AppStyle: dict[str, dict[str, Any]] = {
@@ -110,7 +108,7 @@ AppStyle: dict[str, dict[str, Any]] = {
         # 'expand': False,
         'height': 40,
         'divider_color': colors.BLACK,
-        'bar_hint_text': dic_searchbar_bar_hint_text,
+        'bar_hint_text': "Search a website...",
         # 'view_hint_text': dic_searchbar_view_hint_text,
     },  # FloatingActionButton
     'floating_button': {
@@ -122,17 +120,17 @@ AppStyle: dict[str, dict[str, Any]] = {
     'listTiles': {
         'bgcolor': colors.BLACK38,
         'hover_color': colors.DEEP_PURPLE_ACCENT_400,
-        'shape': RoundedRectangleBorder(radius=15),
         'adaptive': False
     },  # Column for Tiles
     'columnTiles': {
         'spacing': 15,
     },  # ListTiles Wrapper(container)
-    'listTilesCard': {
-        'expand': True,
-        'height': 400,
-        # 'width': 380,
+    'PasswordsCard': {
+        # 'expand': True,
+        'shadow_color': colors.WHITE,
+        'elevation': 15,
         'variant': CardVariant.OUTLINED,
+        'margin': margin.only(left=20, right=20, top=10)
     },  # Switch
     'switch': {
         'active_color': colors.DEEP_PURPLE_ACCENT_700,
@@ -167,5 +165,24 @@ AppStyle: dict[str, dict[str, Any]] = {
             bgcolor=colors.RED_ACCENT_700,
         )
     },
+    'updateButton': {
+        'text': 'Update',
+        'height': 45,
+        'width': 300,
+        'style': ButtonStyle(
+            color=colors.WHITE,
+            bgcolor=colors.DEEP_PURPLE_ACCENT_700,
+        )
+    },
+    'read_only_textfield': {
+        'read_only': True,
+        'expand': True,
+        'border': InputBorder.UNDERLINE,
+    },
+    'icon_copy': {
+        'icon': icons.COPY,
+        'icon_size': 30,
+        'offset': Offset(-0.3, 0.1)
+    }
 
 }

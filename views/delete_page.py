@@ -1,13 +1,30 @@
-from flet import *
-from core import *
+from flet import (Container,
+                  Page,
+                  LinearGradient,
+                  ExpansionPanelList,
+                  ExpansionPanel,
+                  ListTile,
+                  Text,
+                  Image,
+                  IconButton,
+                  Column,
+                  ControlEvent,
+                  FontWeight,
+                  ScrollMode,
+                  icons,
+                  colors)
+from core import AppStyle
 from controls import UserSearchBar
+from data.dbconfig import User
 
 
 class Delete(Container):
     def __init__(self, delete_page: Page, session):
         super().__init__()
         self.page = delete_page
-        self._session = session
+        self.db_session = session
+        self.user = session.query(User).filter_by(email=self.page.session.get('email')).one_or_none()
+        self.websites = self.user.websites
         self.search_bar = UserSearchBar(lambda e: self.filter_panel(e))
         self.expand = True
         self.padding = 10
@@ -16,22 +33,21 @@ class Delete(Container):
             expand_icon_color=colors.DEEP_PURPLE_ACCENT_700,
             elevation=8,
             divider_color=colors.DEEP_PURPLE_ACCENT_700,
-            on_change=lambda e: self.handle_change(e),
-            controls=[
-                # ExpansionPanel(
-                #     # has no header and content - placeholders will be used
-                #     expanded=True)
-                ]
             )
 
-        for i in range(10):
+        for website in self.websites:
             exp = ExpansionPanel(
-                header=ListTile(title=Text(f"Panel {i}")),
+                header=ListTile(
+                    title=Text(f"{website.website}"),
+                    leading=Image(src=website.icon),
+                    data=website),
+
             )
             exp.content = ListTile(
-                title=Text(f"This is in Panel {i}"),
-                subtitle=Text(f"Press the icon to delete panel {i}"),
-                trailing=IconButton(icons.DELETE, on_click=self.handle_delete, data=exp),
+                title=Text(f"Email: {website.email}"),
+                subtitle=Text(f"Password {website.password}"),
+                trailing=IconButton(icons.DELETE, on_click=lambda e: self.handle_delete(e), data=exp,
+                                    icon_color=colors.RED_ACCENT_700),
             )
             self.panels.controls.append(exp)
 
@@ -43,10 +59,10 @@ class Delete(Container):
             spacing=15
         )
 
-    def handle_change(self, e: ControlEvent):
-        print(f"change on panel with index {e.data}")
-
     def handle_delete(self, e: ControlEvent):
+        website_to_delete = e.control.data.header.data
+        self.db_session.delete(website_to_delete)
+        self.db_session.commit()
         self.panels.controls.remove(e.control.data)
         self.page.update()
 
@@ -55,7 +71,7 @@ class Delete(Container):
             for panel in self.panels.controls:
                 panel.visible = (
                     True
-                    if e.data in panel.content.title.value
+                    if e.data in panel.header.title.value
                     else False
                 )
                 self.panels.update()

@@ -12,13 +12,11 @@ from flet import (Page,
                   app)
 from controls import UserBottomAppBar
 from core import AppStyle
-from views import Login, HomePage, Register, Add, Delete, Settings
+from views import Login, HomePage, Register, Add, Delete, Settings, Update
 from data.dbconfig import engine
 from sqlalchemy.orm import sessionmaker
 
-WINDOW_HEIGHT = 740
-WINDOW_WIDTH = 420
-# create_database()
+
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -29,8 +27,8 @@ class Main:
         self.page = main_page
         self.page.adaptive = True
         self.page.title = "Yevhen's Password-Manager"
-        self.page.window_width = WINDOW_WIDTH
-        self.page.window_height = WINDOW_HEIGHT
+        self.page.expand = True
+        self.page.window_width = 480
         self.page.theme_mode = ThemeMode.DARK
         self.page.window_resizable = True
         self.page.padding = padding.all(0)
@@ -43,7 +41,7 @@ class Main:
 
     def helper(self):
         self.page.on_route_change = self.on_route_change
-        self.page.go('/home')
+        self.page.go('/login')
 
     def add_btn(self):
         self.page.on_route_change = self.on_route_change
@@ -56,6 +54,7 @@ class Main:
             '/home': HomePage,
             '/add': Add,
             '/delete': Delete,
+            '/update': Update,
             '/settings': Settings           # f'{self.page.session.get('logged_in')}/dashboard': Dashboard,
         }[self.page.route](self.page, session)
         self.page.views.clear()
@@ -69,7 +68,7 @@ class Main:
                 )
             )
             self.page.update()
-        elif self.page.route == '/add':
+        elif self.page.route == '/add' or self.page.route == '/update':
             self.page.views.append(
                 View(
                     route=route,
@@ -96,7 +95,6 @@ class Main:
                     ),
                     floating_action_button=FloatingActionButton(**AppStyle['floating_button'],
                                                                 on_click=lambda e: self.add_btn()),
-                                                                # on_click=self.page.go('/add')),
                     floating_action_button_location=FloatingActionButtonLocation.CENTER_DOCKED,
                 ))
             self.page.update()
@@ -104,3 +102,4 @@ class Main:
 
 if __name__ == '__main__':
     app(target=Main, assets_dir='assets')  # , view=AppView.WEB_BROWSER, port=5050
+

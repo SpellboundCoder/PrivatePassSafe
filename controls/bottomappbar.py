@@ -23,12 +23,16 @@ class UserBottomAppBar(BottomAppBar):
         self.delete = IconButton(icon=icons.DELETE, icon_size=30, selected=False,
                                  icon_color=colors.GREY if self._route != '/delete' else colors.RED_ACCENT_700
                                  )
+        self.update = IconButton(icon=icons.UPDATE, icon_size=30, selected=False,
+                                 icon_color=colors.GREY if self._route != '/update' else colors.RED_ACCENT_700
+                                 )
         self.themeIcon = IconButton(icon=icons.LIGHT_MODE, icon_size=30, selected=False, icon_color=colors.GREY,
                                     )
         self.content = Row([
             self.home,
             self.delete,
-            VerticalDivider(width=50, color=colors.TRANSPARENT),
+            self.update,
+            VerticalDivider(width=40, color=colors.TRANSPARENT),
             self.settings,
             self.themeIcon,
         ], alignment=MainAxisAlignment.SPACE_BETWEEN,
@@ -38,6 +42,7 @@ class UserBottomAppBar(BottomAppBar):
         self.themeIcon.on_click = self._select_theme
         self.settings.on_click = self._select_settings
         self.delete.on_click = self._select_del
+        self.update.on_click = self._select_update
 
     def _select_home(self, e):
         self._select_icon(self.home)
@@ -51,6 +56,9 @@ class UserBottomAppBar(BottomAppBar):
     def _select_del(self, e):
         self._select_icon(self.delete)
 
+    def _select_update(self, e):
+        self._select_icon(self.update)
+
     def _select_icon(self, selected_icon):
         selected_icon.selected = True
 
@@ -61,6 +69,10 @@ class UserBottomAppBar(BottomAppBar):
         elif selected_icon == self.home:
             if self.page.route != '/home':
                 self.page.go('/home')
+
+        elif selected_icon == self.update:
+            if self.page.route != '/update':
+                self.page.go('/update')
 
         elif selected_icon == self.settings:
             if self.page.route != '/settings':

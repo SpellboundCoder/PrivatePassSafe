@@ -23,6 +23,8 @@ from flet import (Container,
                   Image,
                   Dropdown,
                   SnackBar,
+                  TextButton,
+                  AlertDialog,
                   dropdown,
                   )
 from core import AppStyle, dict_en
@@ -30,31 +32,32 @@ from func import generate_password
 import datetime as dt
 from data.dbconfig import User, Website
 
-now = dt.datetime.now().strftime('%d-%m-%y , %I-%M %p')
+now = dt.datetime.now().strftime('%d-%m-%y (%I-%M %p)')
 dictionary = dict_en['Add']
 
 
-class Add(Container):
+class Update(Container):
     def __init__(self, add_page: Page, session):
         super().__init__(**AppStyle['window'])
         self.db_session = session
         self.page = add_page
         self.padding = 20
         self.gradient = LinearGradient(**AppStyle['gradient'])
-
+        self.user = session.query(User).filter_by(email=self.page.session.get('email')).one_or_none()
+        self.websites = self.user.websites
         # WEBSITE
-        self.website = TextField(**AppStyle['input_textfield'], label="Website", prefix_text="https://")
         self.icon = Image(src='/icons/icon0.png', width=40, height=45, border_radius=15, offset=Offset(0, -0.03))
-        self.icons_dropdown = PopupMenuButton(
-            icon=icons.ARROW_DROP_DOWN,
-            right=0,
-            offset=Offset(0, 0.09),
-            items=[
-                PopupMenuItem(content=Image(src=f'/icons/icon{i}.png', width=50, height=50, border_radius=15),
-                              on_click=self.chosen_icon)
-                for i in range(4)
+        self.chose_website_id = None
+        self.website_options = Dropdown(
+            **AppStyle['dropdown'],
+            hint_text='Pick a Website',
+            on_change=lambda e: self.update_fields(e),
+            options=[
+                dropdown.Option(f"{website.website}", data=website)
+                for website in self.websites
             ],
         )
+
         # USERNAME
         self.username = TextField(**AppStyle['input_textfield'], label="Username")
 
@@ -116,13 +119,24 @@ class Add(Container):
         # MOBILE
         self.mobile = TextField(**AppStyle['input_textfield'], label="Mobile")
 
+        # DIALOG
+        self.dlg_modal = AlertDialog(
+            modal=True,
+            title=Text("Please confirm"),
+            content=Text("Are you sure you wanna update info ?"),
+            actions=[
+                TextButton("Yes", on_click=lambda e: self.confirm_updates()),
+                TextButton("No", on_click=lambda e: self.close_dlg()),
+            ],
+            actions_alignment=MainAxisAlignment.END,
+            on_dismiss=lambda e: print("Modal dialog dismissed!"),
+        )
+
         self.content = Column(
             controls=[
-                Text('Create and Save your Password:', size=20, weight=FontWeight.BOLD),
-                Stack([Row([
-                    self.icon,
-                    self.website,
-                    ], spacing=0), self.icons_dropdown]),
+                Text('Select a website you wanna make changes:', size=20, weight=FontWeight.BOLD),
+                Row([self.icon, self.website_options]
+                    ),
                 Row([
                     Icon(icons.ACCOUNT_CIRCLE, size=40),
                     self.username
@@ -172,7 +186,7 @@ class Add(Container):
                     self.lower_switch,
                 ], alignment=MainAxisAlignment.SPACE_BETWEEN, ),
                 Row(controls=[
-                    ElevatedButton(**AppStyle['submitButton'], on_click=lambda e: self.submit()),
+                    ElevatedButton(**AppStyle['updateButton'], on_click=lambda e: self.open_dlg_modal(e)),  #
                 ], alignment=MainAxisAlignment.CENTER),
                 Row(controls=[
                     ElevatedButton(**AppStyle['cancelButton'],
@@ -182,25 +196,17 @@ class Add(Container):
             ],
             scroll=ScrollMode.HIDDEN)
 
-    def submit(self):
-        if all([self.website.value, self.email.value, self.username.value, self.password_textfield.value]):
-            user = self.db_session.query(User).filter_by(email=self.page.session.get('email')).one_or_none()
-            new_website = Website(
-                website=self.website.value,
-                icon=self.icon.src,
-                tag=self.dd_tags.value,
-                email=self.email.value,
-                username=self.username.value,
-                mobile=self.mobile.value,
-                password=self.password_textfield.value,
-                date=now
-            )
-            user.websites.append(new_website)
-            self.db_session.commit()
-            self.page.go('/home')
-        else:
-            self.validate_error.open = True
-            self.validate_error.update()
+    def confirm_updates(self):
+        website = self.db_session.query(Website).filter_by(id=self.chose_website_id).one_or_none()
+        website.icon = self.icon.src
+        website.tag = self.dd_tags.value
+        website.email = self.email.value
+        website.username = self.username.value
+        website.mobile = self.mobile.value
+        website.password = self.password_textfield.value
+        website.date = now
+        self.db_session.commit()
+        self.page.go('/home')
 
     def update_length(self, e: ControlEvent):
         self.password_length = int(e.control.value)
@@ -219,10 +225,27 @@ class Add(Container):
         self.email.value = e.control.text
         self.email.update()
 
-    def chosen_icon(self, e):
-        self.icon.src = e.control.content.src
-        self.icon.update()
+    def update_fields(self, e):
+        for option in e.control.options:
+            if e.control.value == option.key:
+                print(option.data)
+                self.icon.src = option.data.icon
+                self.username.value = option.data.username
+                self.email.value = option.data.email
+                self.mobile.value = option.data.mobile
+                self.password_textfield.value = option.data.password
+                self.dd_tags.value = option.data.tag
+                self.chose_website_id = option.data.id
+                self.update()
 
     def back_home(self):
         self.page.go('/home')
 
+    def open_dlg_modal(self, e):
+        self.page.dialog = self.dlg_modal
+        self.dlg_modal.open = True
+        self.page.update()
+
+    def close_dlg(self):
+        self.dlg_modal.open = False
+        self.page.update()

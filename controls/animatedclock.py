@@ -15,6 +15,7 @@ class AnimatedLock(Stack):
     def __init__(self, rotate_angle):
         super().__init__()
         self.rotate_angle = rotate_angle
+        self.active = False
         self.controls = [
                 Container(
                     content=Image(
@@ -44,14 +45,14 @@ class AnimatedLock(Stack):
         clock_wise_rotate = pi / 4
         lock = self.controls[1]
         counter = 0
+        self.active = True
         if counter == 0:
-            while True:
+            while self.active:
                 if 0 <= counter <= 3:
                     lock.rotate = transform.Rotate(
                         clock_wise_rotate, alignment=alignment.center
                     )
-                    lock.update()
-
+                    self.update()
                     clock_wise_rotate += pi / 2
                     counter += 1
                     time.sleep(0.9)
@@ -60,11 +61,13 @@ class AnimatedLock(Stack):
                     lock.rotate = transform.Rotate(
                         clock_wise_rotate, alignment=alignment.center
                     )
-                    lock.update()
-
+                    self.update()
                     clock_wise_rotate -= pi / 2
                     counter += 1
                     time.sleep(0.9)
                 if counter > 8:
                     counter = 0
+
+    def stop_animation(self):
+        self.active = False
 
