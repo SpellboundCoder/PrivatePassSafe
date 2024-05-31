@@ -1,57 +1,119 @@
+import os
+import shutil
 from flet import *
 from core import AppStyle
 from controls import EmailRow
+import json
+
+dict_path = 'core/dict.json'
+
+
+def load_dict(path):
+    with open(file=path, mode='r') as file:
+        return json.load(file)
+
+
+def save_dict(dictionary, path):
+    with open(file=path, mode='w') as file:
+        json.dump(dictionary, file)
 
 
 class Settings(Container):
     def __init__(self, settings_page: Page, session):
-        super().__init__(**AppStyle['window'])
+        super().__init__(expand=True, padding=20)
         self._session = session
         self.page = settings_page
-        self.padding = 20
-        self.gradient = LinearGradient(**AppStyle['gradient'])
-        self.emails = self.page.client_storage.get('emails_list') \
-            if self.page.client_storage.contains_key("emails_list") else []
+
+        self.AppStyle = AppStyle(self.page.theme_mode)
+        self.dict = load_dict(dict_path)['websites']
+        self.gradient = LinearGradient(**self.AppStyle.gradient())
+
+        # ACCOUNT
+        self.account_info = Text(value='Your account info:', size=18, weight=FontWeight.BOLD)
+        self.username = TextField(
+            **self.AppStyle.read_only(), value=self.page.client_storage.get('username'), label='Username')
+        self.email = TextField(
+            **self.AppStyle.read_only(), value=self.page.client_storage.get('email'), label='Email')
+        self.log_out_icon = IconButton(icon=icons.LOGOUT, icon_size=40,
+                                       on_click=lambda _: self.open_dlg_modal())
+        self.dlg_modal = AlertDialog(
+            modal=True,
+            title=Text("Please confirm"),
+            content=Text("Are you sure yoo want to Logout? All your preferences will be deleted..."),
+            actions=[
+                TextButton("Yes", on_click=lambda _: self.log_out()),
+                TextButton("No", on_click=lambda _: self.close_dlg_modal()),
+            ],
+            actions_alignment=MainAxisAlignment.END,
+            # on_dismiss=lambda e: print("Modal dialog dismissed!"),
+        )
+
+        # UPLOAD
+        self.file_picker = FilePicker(on_result=self.pick_files_result)
+        self.logo_img = Image(width=45, height=45, src='assets/icons/icon0.png')
+        self.upload_label = Text(value="Upload website's logo and enter the name: ",
+                                 size=18, weight=FontWeight.BOLD)
+        self.upload_textfield = TextField(**self.AppStyle.input_textfield())
+        self.upload_icon = IconButton(icon=icons.UPLOAD,
+                                      on_click=lambda _: self.file_picker.pick_files(
+                                              allowed_extensions=['png'],
+                                              file_type=FilePickerFileType.IMAGE
+                                      ))
+        self.upload_button = ElevatedButton(**self.AppStyle.add_button(), width=35,
+                                            on_click=lambda _: self.add_website())
+        self.page.overlay.append(self.file_picker)
 
         # PASSWORD GENERATOR
-        self.password_section = Text(value='Choose your preferred options for password generator : ', size=18)
-        self.upper_switch = Switch(**AppStyle['switch'],
-                                   value=self.page.client_storage.get('Uppercase')
+        self.password_section = Text(value='Choose your preferred options for password generator : ',
+                                     size=18, weight=FontWeight.BOLD)
+        self.upper_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Uppercase')
                                    if self.page.client_storage.contains_key('Uppercase') else None,
                                    on_change=lambda e: self.upper(e))
-        self.numbers_switch = Switch(**AppStyle['switch'],
-                                     value=self.page.client_storage.get('Numbers')
+        self.numbers_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Numbers')
                                      if self.page.client_storage.contains_key('Numbers') else None,
                                      on_change=lambda e: self.numbers(e))
-        self.symbols_switch = Switch(**AppStyle['switch'],
-                                     value=self.page.client_storage.get('Symbols')
+        self.symbols_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Symbols')
                                      if self.page.client_storage.contains_key('Symbols') else None,
                                      on_change=lambda e: self.symbols(e))
         self.slider = Slider(value=self.page.client_storage.get('Pass_length')
                              if self.page.client_storage.contains_key('Pass_length') else 8,
-                             min=8, max=60, on_change=self.update_length,
-                             active_color=colors.DEEP_PURPLE_ACCENT_700)
+                             on_change=self.update_length,
+                             **self.AppStyle.slider())
         self.password_length = int(self.slider.value)
-        self.password_label = Text(f"Password length: {self.password_length}",
-                                   size=18,
-                                   weight=FontWeight.BOLD)
+        self.password_label = Text(f"Password length: {self.password_length}", size=18)
 
         # EMAIL
-        self.email_section = Text(value='Save your preferred Emails : ', size=18)
-        self.email_textbox = EmailRow(self.on_focus())
-        self.d = Dropdown(**AppStyle['dropdown'], options=[
+        self.emails = self.page.client_storage.get('emails_list') \
+            if self.page.client_storage.contains_key("emails_list") else []
+        self.email_section = Text(value='Save your preferred Emails : ', size=18, weight=FontWeight.BOLD)
+        self.email_textbox = EmailRow(self.on_focus(), self.page.theme_mode)
+        self.d = Dropdown(**self.AppStyle.dropdown(), options=[
             dropdown.Option(self.emails[i])
             for i in range(len(self.emails))
         ])
         self.add = ElevatedButton(
-            **AppStyle['addButton'],
-            on_click=lambda e: self.add_clicked())
+            **self.AppStyle.add_button(),
+            on_click=lambda e: self.add_email())
         self.delete = OutlinedButton(
-            **AppStyle['deleteButton'],
+            **self.AppStyle.delete_button(),
             on_click=lambda e: self.delete_clicked())
+
+        # THEME_MODE
+        self.dark_mode_icon = IconButton(
+            **self.AppStyle.dark_theme_icon(),
+            on_click=lambda e: self.change_theme(e),
+            )
+        self.light_mode_icon = IconButton(
+            **self.AppStyle.light_theme_icon(),
+            on_click=lambda e: self.change_theme(e),
+        )
 
         # PAGE CONTENT
         self.content = Column([
+            Row([self.account_info]),
+            Row([self.username, self.email]),
+            Row([self.upload_label]),
+            Row([self.logo_img, self.upload_icon, self.upload_textfield, self.upload_button]),
             Row([self.email_section], alignment=MainAxisAlignment.START),
             Row([self.d], alignment=MainAxisAlignment.CENTER),
             self.email_textbox,
@@ -60,19 +122,41 @@ class Settings(Container):
             ResponsiveRow([self.password_section], alignment=MainAxisAlignment.START),
             Row([self.password_label, self.slider]),
             Row(height=40, controls=[
-                Text('Uppercase(A-Z)', size=18, weight=FontWeight.BOLD),
+                Text('Uppercase(A-Z)', size=18),
                 self.upper_switch],
                 alignment=MainAxisAlignment.SPACE_BETWEEN,
                 ),
             Row(height=40, controls=[
-                Text('Numbers(123...)', size=18, weight=FontWeight.BOLD),
+                Text('Numbers(123...)', size=18),
                 self.numbers_switch,
             ], alignment=MainAxisAlignment.SPACE_BETWEEN, ),
             Row(height=40, controls=[
-                Text('Random Symbols($&*...)', size=18, weight=FontWeight.BOLD),
+                Text('Random Symbols($&*...)', size=18),
                 self.symbols_switch,
-            ], alignment=MainAxisAlignment.SPACE_BETWEEN, ),
+            ], alignment=MainAxisAlignment.SPACE_BETWEEN),
+            Divider(height=5, color=colors.BLACK),
+            Row(height=50, controls=[
+                Text('Chose a Theme Mode: ', size=18, weight=FontWeight.BOLD),
+                Container(Row([self.dark_mode_icon, self.light_mode_icon], spacing=0))
+            ], alignment=MainAxisAlignment.SPACE_BETWEEN),
+            Row(height=50, controls=[
+                Text('Logout: ', size=18, weight=FontWeight.BOLD),
+                self.log_out_icon
+            ], alignment=MainAxisAlignment.SPACE_BETWEEN),
+            self.file_picker
         ])
+
+    def pick_files_result(self, e: FilePickerResultEvent):
+        icons_path = os.path.join(os.getcwd(), 'assets/icons')
+        icons_count = len(os.listdir(icons_path))
+        for x in e.files:
+            shutil.copy(x.path, icons_path)
+            current_file_path = os.path.join(icons_path, x.name)
+            new_name = f'icon{icons_count}.png'
+            new_file_path = os.path.join(icons_path, new_name)
+            os.rename(current_file_path, new_file_path)
+            self.logo_img.src = f'assets/icons/{new_name}'
+            self.page.update()
 
     def find_option(self, option_name):
         for option in self.d.options:
@@ -80,7 +164,35 @@ class Settings(Container):
                 return option
         return None
 
-    def add_clicked(self):
+    def open_dlg_modal(self):
+        self.page.dialog = self.dlg_modal
+        self.dlg_modal.open = True
+        self.page.update()
+
+    def close_dlg_modal(self):
+        self.dlg_modal.open = False
+        self.page.update()
+
+    def log_out(self):
+        self.page.client_storage.clear()
+        self.page.session.clear()
+        self.page.go('/login')
+
+    def change_theme(self, e):
+        if e.control.icon == icons.DARK_MODE_OUTLINED:
+            self.page.client_storage.set("theme", 'DARK')
+            self.page.theme_mode = ThemeMode.DARK
+            self.page.update()
+            self.page.go('/home')
+            self.page.go('/settings')
+        elif e.control.icon == icons.LIGHT_MODE_OUTLINED:
+            self.page.client_storage.set("theme", 'LIGHT')
+            self.page.theme_mode = ThemeMode.LIGHT
+            self.page.update()
+            self.page.go('/home')
+            self.page.go('/settings')
+
+    def add_email(self):
         if self.page.client_storage.contains_key("emails_list"):         # True if the key exists
             self.emails.append(self.email_textbox.controls[0].value)
             self.page.client_storage.set("emails_list", self.emails)
@@ -90,6 +202,12 @@ class Settings(Container):
         self.d.value = self.email_textbox.controls[0].value
         self.email_textbox.controls[0].value = ""
         self.page.update()
+
+    def add_website(self):
+        icons_path = os.path.join(os.getcwd(), 'assets/icons')
+        icons_count = len(os.listdir(icons_path))
+        self.dict[f'icon{icons_count}.png'] = self.upload_textfield.value
+        save_dict(self.dict, dict_path)
 
     def delete_clicked(self):
         option = self.find_option(self.d.value)

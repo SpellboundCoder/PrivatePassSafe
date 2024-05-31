@@ -1,4 +1,4 @@
-/test
+/_my_test
 ../../Desktop/PrivitePassSafe/.env
 /data/database.db
 Project's TODO list
@@ -152,7 +152,7 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Unit test / coverage reports
+# Unit _my_test / coverage reports
 htmlcov/
 .tox/
 .nox/

@@ -17,10 +17,11 @@ from flet import (Page,
                   Offset,
                   icons,
                   colors,
-                  ScrollMode)
+                  ScrollMode,
+                  padding)
 from werkzeug.security import check_password_hash
 from controls import AnimatedLock, EmailRow
-from core import AppStyle, dict_en
+from core import dict_en, AppStyle
 from data.dbconfig import User
 from time import sleep
 
@@ -28,19 +29,22 @@ dictionary = dict_en['Login']
 
 
 class Login(Container):
+
     def __init__(self, login_page: Page, session):
-        super().__init__(**AppStyle['login/register_window'])
+        super().__init__(expand=True, padding=15)
         self.page = login_page
         self.session = session
-        self.lock = AnimatedLock(rotate_angle=pi / 4)
         self.activated_lock = False
-        self.gradient = LinearGradient(**AppStyle['gradient'])
+
+        self.AppStyle = AppStyle(self.page.theme_mode)
+        self.lock = AnimatedLock(rotate_angle=pi / 4)
+        self.gradient = LinearGradient(**self.AppStyle.gradient())
 
         # LOGIN Form
-        self.login_email = EmailRow(lambda e: self.activate_lock())
+        self.login_email = EmailRow(lambda e: self.activate_lock(), self.page.theme_mode)
 
         self.login_password = TextField(
-            **AppStyle['input_textfield'],
+            **self.AppStyle.input_textfield(),
             label=dictionary['password'],
             prefix_icon=icons.LOCK,
             password=True,
@@ -48,12 +52,14 @@ class Login(Container):
             on_focus=lambda e: self.activate_lock()
         )
         self.login_button = ElevatedButton(
-            **AppStyle['loginButton'],
+            **self.AppStyle.primary_button(),
+            text='Log In',
             on_click=lambda e: self.login_auth(),
         )
         self.login_error = SnackBar(
-            Text(dictionary['error'], color=colors.WHITE),
-            **AppStyle['snack_bar']
+            Text(dictionary['error'],
+                 color=colors.WHITE),
+            bgcolor=colors.RED
         )
 
         # PAGE CONTENT
@@ -111,7 +117,7 @@ class Login(Container):
                                 )
                             ],
                         ),
-                        **AppStyle['form']
+                        padding=padding.only(left=15, right=15)
                     ),
                     self.login_error,
                 ]
@@ -126,6 +132,8 @@ class Login(Container):
             if check_password_hash(user.password, password):
                 self.page.session.set(key="username", value=user.username)
                 self.page.session.set(key="email", value=user.email)
+                self.page.client_storage.set(key="username", value=user.username)
+                self.page.client_storage.set(key="email", value=user.email)
                 self.lock.stop_animation()
                 sleep(0.5)
                 self.page.go('/home')

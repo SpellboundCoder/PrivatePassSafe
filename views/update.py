@@ -27,7 +27,7 @@ from flet import (Container,
                   AlertDialog,
                   dropdown,
                   )
-from core import AppStyle, dict_en
+from core import dict_en, AppStyle
 from func import generate_password
 import datetime as dt
 from data.dbconfig import User, Website
@@ -38,18 +38,21 @@ dictionary = dict_en['Add']
 
 class Update(Container):
     def __init__(self, add_page: Page, session):
-        super().__init__(**AppStyle['window'])
+        super().__init__(padding=20, expand=True)
         self.db_session = session
         self.page = add_page
-        self.padding = 20
-        self.gradient = LinearGradient(**AppStyle['gradient'])
+
+        self.AppStyle = AppStyle(self.page.theme_mode)
+
+        self.gradient = LinearGradient(**self.AppStyle.gradient())
+
         self.user = session.query(User).filter_by(email=self.page.session.get('email')).one_or_none()
         self.websites = self.user.websites
         # WEBSITE
         self.icon = Image(src='/icons/icon0.png', width=40, height=45, border_radius=15, offset=Offset(0, -0.03))
         self.chose_website_id = None
         self.website_options = Dropdown(
-            **AppStyle['dropdown'],
+            **self.AppStyle.dropdown(),
             hint_text='Pick a Website',
             on_change=lambda e: self.update_fields(e),
             options=[
@@ -59,10 +62,10 @@ class Update(Container):
         )
 
         # USERNAME
-        self.username = TextField(**AppStyle['input_textfield'], label="Username")
+        self.username = TextField(**self.AppStyle.input_textfield(), label="Username")
 
         # EMAIL
-        self.email = TextField(**AppStyle['input_textfield'], label='Email')
+        self.email = TextField(**self.AppStyle.input_textfield(), label='Email')
         self.email_list = self.page.client_storage.get('emails_list') \
             if self.page.client_storage.contains_key('emails_list') else []
         self._dropdown = PopupMenuButton(
@@ -76,40 +79,39 @@ class Update(Container):
         )
 
         # PASSWORD
-        self.password_textfield = TextField(**AppStyle['password_field'])
-        self.slider = Slider(value=self.page.client_storage.get('Pass_length')
-                             if self.page.client_storage.contains_key('Pass_length') else 10,
-                             min=8, max=60, on_change=self.update_length,
-                             active_color=colors.DEEP_PURPLE_ACCENT_700
-                             )
+        self.password_textfield = TextField(**self.AppStyle.password_field())
+        self.slider = Slider(
+            value=self.page.client_storage.get('Pass_length')
+            if self.page.client_storage.contains_key('Pass_length') else 10,
+            on_change=self.update_length,
+            **self.AppStyle.slider())
+
         self.password_length = int(self.slider.value)
-        self.password_label = Text(f"Password length: {self.password_length}",
-                                   size=18,
-                                   weight=FontWeight.BOLD
-                                   )
-        self.upper_switch = Switch(**AppStyle['switch'],
-                                   value=self.page.client_storage.get('Uppercase')
-                                   if self.page.client_storage.contains_key('Uppercase') else None
-                                   )
-        self.numbers_switch = Switch(**AppStyle['switch'],
-                                     value=self.page.client_storage.get('Numbers')
-                                     if self.page.client_storage.contains_key('Numbers') else None
-                                     )
-        self.symbols_switch = Switch(**AppStyle['switch'],
-                                     value=self.page.client_storage.get('Symbols')
-                                     if self.page.client_storage.contains_key('Symbols') else None
-                                     )
+        self.password_label = Text(
+            f"Password length: {self.password_length}",
+            size=18,
+            weight=FontWeight.BOLD)
+        self.upper_switch = Switch(
+            **self.AppStyle.switch(),
+            value=self.page.client_storage.get('Uppercase')
+            if self.page.client_storage.contains_key('Uppercase') else None)
+        self.numbers_switch = Switch(
+            **self.AppStyle.switch(),
+            value=self.page.client_storage.get('Numbers') if self.page.client_storage.contains_key('Numbers') else None)
+        self.symbols_switch = Switch(
+            **self.AppStyle.switch(),
+            value=self.page.client_storage.get('Symbols') if self.page.client_storage.contains_key('Symbols') else None)
         self.lower_switch = Switch(disabled=True, value=True)
 
         # validate error
         self.validate_error = SnackBar(
             Text(dictionary['error'], color=colors.WHITE),
-            **AppStyle['snack_bar'])
+            bgcolor=colors.RED)
 
         # TAGS
         self.tag_list = ["Favorite", "Entertainment", "Social Media", "Messengers", "Work", "Study", "Other"]
         self.dd_tags = Dropdown(
-            **AppStyle['dropdown'],
+            **self.AppStyle.dropdown(),
             value='Other',
             options=[
                 dropdown.Option(f'{self.tag_list[i]}')
@@ -117,7 +119,7 @@ class Update(Container):
             ],
         )
         # MOBILE
-        self.mobile = TextField(**AppStyle['input_textfield'], label="Mobile")
+        self.mobile = TextField(**self.AppStyle.input_textfield(), label="Mobile")
 
         # DIALOG
         self.dlg_modal = AlertDialog(
@@ -135,34 +137,34 @@ class Update(Container):
         self.content = Column(
             controls=[
                 Text('Select a website you wanna make changes:', size=20, weight=FontWeight.BOLD),
-                Row([self.icon, self.website_options]
-                    ),
                 Row([
-                    Icon(icons.ACCOUNT_CIRCLE, size=40),
+                    self.icon,
+                    self.website_options
+                ], spacing=2),
+                Row([
+                    Icon(icons.ACCOUNT_CIRCLE, **self.AppStyle.icon()),
                     self.username
                 ], spacing=0),
-                Stack([Row([
-                    Icon(icons.EMAIL, size=40), self.email,
-                ], spacing=0), self._dropdown]),
+                Stack([
+                    Row([
+                        Icon(icons.EMAIL, **self.AppStyle.icon()), self.email,
+                    ], spacing=0), self._dropdown]),
                 Row([
-                    Icon(icons.PHONE, size=40), self.mobile,
+                    Icon(icons.PHONE, **self.AppStyle.icon()), self.mobile,
                 ], spacing=0),
                 Row([
-                    Icon(icons.TAG, size=40), self.dd_tags,
+                    Icon(icons.TAG, **self.AppStyle.icon()), self.dd_tags,
                 ], spacing=0),
 
                 Row([
-                    Icon(icons.PASSWORD, size=40),
+                    Icon(icons.PASSWORD, **self.AppStyle.icon()),
                     Text('Your Password:', size=20, weight=FontWeight.BOLD),
                 ], spacing=0, alignment=MainAxisAlignment.CENTER),
                 self.password_textfield,
                 Row([
                     self.password_label,
                     IconButton(
-                        icon=icons.LOCK_RESET,
-                        icon_size=40,
-                        icon_color=colors.DEEP_PURPLE_ACCENT_700,
-                        offset=Offset(0, -0.2),
+                        **self.AppStyle.generate_pass_icon(),
                         on_click=lambda e: self.create_password()
                     )],
                     alignment=MainAxisAlignment.SPACE_BETWEEN,
@@ -186,11 +188,15 @@ class Update(Container):
                     self.lower_switch,
                 ], alignment=MainAxisAlignment.SPACE_BETWEEN, ),
                 Row(controls=[
-                    ElevatedButton(**AppStyle['updateButton'], on_click=lambda e: self.open_dlg_modal(e)),  #
+                    ElevatedButton(
+                        text='Update',
+                        **self.AppStyle.primary_button(),
+                        on_click=lambda e: self.open_dlg_modal())
                 ], alignment=MainAxisAlignment.CENTER),
                 Row(controls=[
-                    ElevatedButton(**AppStyle['cancelButton'],
-                                   on_click=lambda e: self.back_home())
+                    ElevatedButton(
+                        **self.AppStyle.cancel_button(),
+                        on_click=lambda e: self.back_home())
                 ], alignment=MainAxisAlignment.CENTER),
                 self.validate_error
             ],
@@ -241,7 +247,7 @@ class Update(Container):
     def back_home(self):
         self.page.go('/home')
 
-    def open_dlg_modal(self, e):
+    def open_dlg_modal(self):
         self.page.dialog = self.dlg_modal
         self.dlg_modal.open = True
         self.page.update()

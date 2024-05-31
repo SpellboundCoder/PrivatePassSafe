@@ -5,3 +5,4 @@ from .login_page import Login
 from .register_page import Register
 from .settings import Settings
 from .update import Update
+from .password import Password

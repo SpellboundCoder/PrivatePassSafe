@@ -11,6 +11,8 @@ from flet import (Container,
                   ControlEvent,
                   FontWeight,
                   ScrollMode,
+Theme,
+ExpansionTileTheme,
                   icons,
                   colors)
 from core import AppStyle
@@ -20,20 +22,18 @@ from data.dbconfig import User
 
 class Delete(Container):
     def __init__(self, delete_page: Page, session):
-        super().__init__()
+        super().__init__(expand=True, padding=20)
         self.page = delete_page
         self.db_session = session
+        self.AppStyle = AppStyle(self.page.theme_mode)
+
         self.user = session.query(User).filter_by(email=self.page.session.get('email')).one_or_none()
         self.websites = self.user.websites
-        self.search_bar = UserSearchBar(lambda e: self.filter_panel(e))
-        self.expand = True
-        self.padding = 10
-        self.gradient = LinearGradient(**AppStyle['gradient'])
-        self.panels = ExpansionPanelList(
-            expand_icon_color=colors.DEEP_PURPLE_ACCENT_700,
-            elevation=8,
-            divider_color=colors.DEEP_PURPLE_ACCENT_700,
-            )
+        self.search_bar = UserSearchBar(lambda e: self.filter_panel(e), self.page.theme_mode)
+
+        self.gradient = LinearGradient(**self.AppStyle.gradient())
+
+        self.panels = ExpansionPanelList(**self.AppStyle.expansion_panel())
 
         for website in self.websites:
             exp = ExpansionPanel(
@@ -54,7 +54,7 @@ class Delete(Container):
         self.content = Column(
             controls=[Text(value='PrivatePassSafe', color=colors.RED_ACCENT_700, size=25, weight=FontWeight.BOLD),
                       self.search_bar,
-                      self.panels],
+                      Container(content=self.panels, padding=10)],
             scroll=ScrollMode.HIDDEN,
             spacing=15
         )

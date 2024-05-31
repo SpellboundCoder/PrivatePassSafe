@@ -6,7 +6,6 @@ from flet import (Container,
                   Text,
                   Row,
                   Column,
-                  FontWeight,
                   MainAxisAlignment,
                   Page,
                   TextSpan,
@@ -16,37 +15,41 @@ from flet import (Container,
                   colors,
                   icons,
                   alignment,
+                  padding
                   )
 from controls import AnimatedLock, EmailRow
-from core import AppStyle, dict_en
+from core import dict_en, AppStyle
 from math import pi
 from werkzeug.security import generate_password_hash
 from data.dbconfig import User
+from time import sleep
 
 dictionary = dict_en['Register']
 
 
 class Register(Container):
     def __init__(self, login_page: Page, session): # noqa
-        super().__init__(**AppStyle['login/register_window'])
+        super().__init__(expand=True, padding=15)
         self.page = login_page
         self._session = session
-        self.lock = AnimatedLock(rotate_angle=pi / 4)
         self.activated_lock = False
-        self.gradient = LinearGradient(**AppStyle['gradient'])
+
+        self.AppStyle = AppStyle(self.page.theme_mode)
+        self.lock = AnimatedLock(rotate_angle=pi / 4)
+        self.gradient = LinearGradient(**self.AppStyle.gradient())
 
         # REGISTER Form
         self.register_username = TextField(
-            **AppStyle['input_textfield'],
-            prefix_icon=icons.ADMIN_PANEL_SETTINGS,
+            **self.AppStyle.input_textfield(),
+            prefix_icon=icons.ACCOUNT_CIRCLE,
             label=dictionary['username'],
             on_focus=lambda e: self.activate_lock(),
             on_change=lambda e: self.validate()
         )
-        self.register_email = EmailRow(lambda e: self.activate_lock())
+        self.register_email = EmailRow(lambda e: self.activate_lock(), self.page.theme_mode)
 
         self.register_password = TextField(
-            **AppStyle['input_textfield'],
+            **self.AppStyle.input_textfield(),
             label=dictionary['password'],
             prefix_icon=icons.LOCK,
             password=True,
@@ -55,7 +58,7 @@ class Register(Container):
             on_change=lambda e: self.validate()
         )
         self.register_confirm_password = TextField(
-            **AppStyle['input_textfield'],
+            **self.AppStyle.input_textfield(),
             label=dictionary['confirm_password'],
             prefix_icon=icons.LOCK,
             password=True,
@@ -63,13 +66,13 @@ class Register(Container):
             on_change=lambda e: self.validate()
         )
         self.register_button = ElevatedButton(
-            **AppStyle['signupButton'],
+            **self.AppStyle.sign_up(),
             disabled=True,
             on_click=lambda e: self.register(),
         )
         self.register_error = SnackBar(
             Text(dictionary['error'], color=colors.WHITE),
-            **AppStyle['snack_bar'])
+            bgcolor=colors.RED)
 
         self.content = Column(
             controls=[
@@ -78,10 +81,7 @@ class Register(Container):
                         alignment=alignment.center,
                 ),
                 Row([
-                    Text(
-                        value='Welcome to PrivatePassSafe!',
-                        size=22,
-                        weight=FontWeight.BOLD),
+                    Text(**self.AppStyle.logo()),
                     ],
                     alignment=MainAxisAlignment.CENTER),
 
@@ -107,7 +107,7 @@ class Register(Container):
                              ], alignment=MainAxisAlignment.CENTER)
                         ],
                         spacing=10),
-                    **AppStyle['form']
+                    padding=padding.only(left=15, right=15)
                 ),
                 self.register_error,]
         )
@@ -125,8 +125,13 @@ class Register(Container):
                                 )
                 self._session.add(new_user)
                 self._session.commit()
+                self.page.client_storage.clear()
                 self.page.session.set(key="username", value=self.register_username.value)
+                self.page.client_storage.set(key='username', value=self.register_username.value)
                 self.page.session.set(key="email", value=self.register_email.controls[0].value)
+                self.page.client_storage.set(key='email', value=self.register_email.controls[0].value)
+                self.lock.stop_animation()
+                sleep(0.2)
                 self.page.go(f'/home')
             else:
                 self.register_error.open = True
@@ -142,7 +147,7 @@ class Register(Container):
                 self.register_password.value,
                 self.register_confirm_password.value]):
             self.register_button.disabled = False
-            self.register_button.style.bgcolor = colors.DEEP_PURPLE_ACCENT_700
+            self.register_button.style.bgcolor = self.AppStyle.sign_up_bgcolor
         else:
             self.register_button.disabled = True
         self.page.update()
@@ -153,4 +158,5 @@ class Register(Container):
             self.lock.animate_lock()
 
     def to_login(self):
+        self.lock.stop_animation()
         self.page.go('/login')

@@ -20,9 +20,9 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(String(50))
-    email: Mapped[str] = mapped_column(String(50), unique=True)
-    password: Mapped[str] = mapped_column(String(60))
+    username: Mapped[str] = mapped_column(String(50), nullable=False)
+    email: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(String(60), nullable=False)
     websites: Mapped[List["Website"]] = relationship(
         back_populates="user", cascade="all, delete-orphan")
 

@@ -7,6 +7,7 @@ from flet import (Stack,
                   Text,
                   FontWeight,
                   AnimationCurve,
+                  Page,
                   alignment,
                   icons,
                   transform,
@@ -15,12 +16,13 @@ from core import AppStyle
 
 
 class EmailRow(Stack):
-    def __init__(self, _on_focus):
+    def __init__(self, _on_focus, theme_mode: Page.theme_mode):
         super().__init__()
         self.spacing = 0
+        self.AppStyle = AppStyle(theme_mode)
         self.controls = [
             TextField(on_change=lambda e: self.get_suffix_emails(e),
-                      **AppStyle['input_textfield'],
+                      **self.AppStyle.input_textfield(),
                       label='Email',
                       prefix_icon=icons.EMAIL,
                       on_focus=_on_focus,
@@ -83,4 +85,3 @@ class EmailRow(Stack):
             self.controls[1].offset = transform.Offset(0.5, 0)
             self.controls[1].opacity = 0
             self.page.update()
-

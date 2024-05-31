@@ -11,7 +11,6 @@ from flet import (Container,
                   Icon,
                   IconButton,
                   MainAxisAlignment,
-                  Offset,
                   ElevatedButton,
                   ControlEvent,
                   ScrollMode,
@@ -28,44 +27,56 @@ from flet import (Container,
 from core import AppStyle, dict_en
 from func import generate_password
 import datetime as dt
+import os
+import json
 from data.dbconfig import User, Website
 
 now = dt.datetime.now().strftime('%d-%m-%y , %I-%M %p')
 dictionary = dict_en['Add']
 
+dict_path = 'core/dict.json'
+# absolute_path = os.path.abspath(dict_path)
+
+
+def load_dict(path):
+    with open(file=path, mode='r') as file:
+        return json.load(file)
+
 
 class Add(Container):
     def __init__(self, add_page: Page, session):
-        super().__init__(**AppStyle['window'])
-        self.db_session = session
+        super().__init__(expand=True, padding=20)
         self.page = add_page
-        self.padding = 20
-        self.gradient = LinearGradient(**AppStyle['gradient'])
+        self.db_session = session
+        self.icons_path = os.path.join(os.getcwd(), 'assets/icons')
+        self.icons_count = len(os.listdir(self.icons_path))
+
+        self.dict = load_dict(dict_path)['websites']
+        self.AppStyle = AppStyle(self.page.theme_mode)
+
+        self.gradient = LinearGradient(**self.AppStyle.gradient())
 
         # WEBSITE
-        self.website = TextField(**AppStyle['input_textfield'], label="Website", prefix_text="https://")
-        self.icon = Image(src='/icons/icon0.png', width=40, height=45, border_radius=15, offset=Offset(0, -0.03))
+        self.website = TextField(**self.AppStyle.input_textfield(), label="Website")
+        self.icon = Image(**self.AppStyle.website_image())
         self.icons_dropdown = PopupMenuButton(
-            icon=icons.ARROW_DROP_DOWN,
-            right=0,
-            offset=Offset(0, 0.09),
+            **self.AppStyle.pop_up_menu(),
             items=[
                 PopupMenuItem(content=Image(src=f'/icons/icon{i}.png', width=50, height=50, border_radius=15),
-                              on_click=self.chosen_icon)
-                for i in range(4)
+                              on_click=lambda e: self.chosen_icon(e),
+                              data=self.dict[f'icon{i}'] if f'icon{i}' in self.dict else '')
+                for i in range(self.icons_count)
             ],
         )
         # USERNAME
-        self.username = TextField(**AppStyle['input_textfield'], label="Username")
+        self.username = TextField(**self.AppStyle.input_textfield(), label="Username")
 
         # EMAIL
-        self.email = TextField(**AppStyle['input_textfield'], label='Email')
+        self.email = TextField(**self.AppStyle.input_textfield(), label='Email')
         self.email_list = self.page.client_storage.get('emails_list') \
             if self.page.client_storage.contains_key('emails_list') else []
         self._dropdown = PopupMenuButton(
-            icon=icons.ARROW_DROP_DOWN,
-            right=0,
-            offset=Offset(0, 0.09),
+            **self.AppStyle.pop_up_menu(),
             items=[
                 PopupMenuItem(self.email_list[i], on_click=self.chosen_email)
                 for i in range(len(self.email_list))
@@ -73,27 +84,24 @@ class Add(Container):
         )
 
         # PASSWORD
-        self.password_textfield = TextField(**AppStyle['password_field'])
+        self.password_textfield = TextField(**self.AppStyle.password_field())
         self.slider = Slider(value=self.page.client_storage.get('Pass_length')
                              if self.page.client_storage.contains_key('Pass_length') else 10,
-                             min=8, max=60, on_change=self.update_length,
-                             active_color=colors.DEEP_PURPLE_ACCENT_700
+                             on_change=self.update_length,
+                             **self.AppStyle.slider()
                              )
         self.password_length = int(self.slider.value)
         self.password_label = Text(f"Password length: {self.password_length}",
                                    size=18,
                                    weight=FontWeight.BOLD
                                    )
-        self.upper_switch = Switch(**AppStyle['switch'],
-                                   value=self.page.client_storage.get('Uppercase')
+        self.upper_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Uppercase')
                                    if self.page.client_storage.contains_key('Uppercase') else None
                                    )
-        self.numbers_switch = Switch(**AppStyle['switch'],
-                                     value=self.page.client_storage.get('Numbers')
+        self.numbers_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Numbers')
                                      if self.page.client_storage.contains_key('Numbers') else None
                                      )
-        self.symbols_switch = Switch(**AppStyle['switch'],
-                                     value=self.page.client_storage.get('Symbols')
+        self.symbols_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Symbols')
                                      if self.page.client_storage.contains_key('Symbols') else None
                                      )
         self.lower_switch = Switch(disabled=True, value=True)
@@ -101,12 +109,12 @@ class Add(Container):
         # validate error
         self.validate_error = SnackBar(
             Text(dictionary['error'], color=colors.WHITE),
-            **AppStyle['snack_bar'])
+            bgcolor=colors.RED_ACCENT_700)
 
         # TAGS
         self.tag_list = ["Favorite", "Entertainment", "Social Media", "Messengers", "Work", "Study", "Other"]
         self.dd_tags = Dropdown(
-            **AppStyle['dropdown'],
+            **self.AppStyle.dropdown(),
             value='Other',
             options=[
                 dropdown.Option(f'{self.tag_list[i]}')
@@ -114,7 +122,7 @@ class Add(Container):
             ],
         )
         # MOBILE
-        self.mobile = TextField(**AppStyle['input_textfield'], label="Mobile")
+        self.mobile = TextField(**self.AppStyle.input_textfield(), label="Mobile")
 
         self.content = Column(
             controls=[
@@ -122,33 +130,30 @@ class Add(Container):
                 Stack([Row([
                     self.icon,
                     self.website,
-                    ], spacing=0), self.icons_dropdown]),
+                    ], spacing=2), self.icons_dropdown]),
                 Row([
-                    Icon(icons.ACCOUNT_CIRCLE, size=40),
+                    Icon(icons.ACCOUNT_CIRCLE, **self.AppStyle.icon()),
                     self.username
                 ], spacing=0),
                 Stack([Row([
-                    Icon(icons.EMAIL, size=40), self.email,
+                    Icon(icons.EMAIL, **self.AppStyle.icon()), self.email,
                 ], spacing=0), self._dropdown]),
                 Row([
-                    Icon(icons.PHONE, size=40), self.mobile,
+                    Icon(icons.PHONE, **self.AppStyle.icon()), self.mobile,
                 ], spacing=0),
                 Row([
-                    Icon(icons.TAG, size=40), self.dd_tags,
+                    Icon(icons.TAG, **self.AppStyle.icon()), self.dd_tags,
                 ], spacing=0),
 
                 Row([
-                    Icon(icons.PASSWORD, size=40),
+                    Icon(icons.PASSWORD, **self.AppStyle.icon()),
                     Text('Your Password:', size=20, weight=FontWeight.BOLD),
                 ], spacing=0, alignment=MainAxisAlignment.CENTER),
                 self.password_textfield,
                 Row([
                     self.password_label,
                     IconButton(
-                        icon=icons.LOCK_RESET,
-                        icon_size=40,
-                        icon_color=colors.DEEP_PURPLE_ACCENT_700,
-                        offset=Offset(0, -0.2),
+                        **self.AppStyle.generate_pass_icon(),
                         on_click=lambda e: self.create_password()
                     )],
                     alignment=MainAxisAlignment.SPACE_BETWEEN,
@@ -172,10 +177,12 @@ class Add(Container):
                     self.lower_switch,
                 ], alignment=MainAxisAlignment.SPACE_BETWEEN, ),
                 Row(controls=[
-                    ElevatedButton(**AppStyle['submitButton'], on_click=lambda e: self.submit()),
+                    ElevatedButton(**self.AppStyle.primary_button(),
+                                   text='Submit',
+                                   on_click=lambda e: self.submit()),
                 ], alignment=MainAxisAlignment.CENTER),
                 Row(controls=[
-                    ElevatedButton(**AppStyle['cancelButton'],
+                    ElevatedButton(**self.AppStyle.cancel_button(),
                                    on_click=lambda e: self.back_home())
                 ], alignment=MainAxisAlignment.CENTER),
                 self.validate_error
@@ -221,8 +228,8 @@ class Add(Container):
 
     def chosen_icon(self, e):
         self.icon.src = e.control.content.src
-        self.icon.update()
+        self.website.value = e.control.data
+        self.update()
 
     def back_home(self):
         self.page.go('/home')
-
