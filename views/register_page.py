@@ -71,7 +71,7 @@ class Register(Container):
             on_click=lambda e: self.register(),
         )
         self.register_error = SnackBar(
-            Text(dictionary['error'], color=colors.WHITE),
+            Text(color=colors.WHITE),
             bgcolor=colors.RED)
 
         self.content = Column(
@@ -115,31 +115,44 @@ class Register(Container):
     def register(self):
         email = self.register_email.controls[0].value
         user = self._session.query(User).filter_by(email=email).one_or_none()
-        if not user:
-            if self.register_password.value == self.register_confirm_password.value:
-                new_user = User(username=self.register_username.value,
-                                email=self.register_email.controls[0].value,
-                                password=generate_password_hash(self.register_password.value,
-                                                                method='pbkdf2:sha256',
-                                                                salt_length=8)
-                                )
-                self._session.add(new_user)
-                self._session.commit()
-                self.page.client_storage.clear()
-                self.page.session.set(key="username", value=self.register_username.value)
-                self.page.client_storage.set(key='username', value=self.register_username.value)
-                self.page.session.set(key="email", value=self.register_email.controls[0].value)
-                self.page.client_storage.set(key='email', value=self.register_email.controls[0].value)
-                self.lock.stop_animation()
-                sleep(0.2)
-                self.page.go(f'/home')
-            else:
-                self.register_error.open = True
-                self.register_error.update()
-        else:
-            self.register_error.content.value = "User with this email already registered, please Login!"
+        if user:
+            self.register_error.content.value = dictionary['error_user']
             self.register_error.open = True
             self.register_error.update()
+            return
+        if "@" and ".com" not in email:
+            self.register_error.content.value = dictionary['error_email']
+            self.register_error.open = True
+            self.register_error.update()
+            return
+        if len(self.register_password.value) < 8:
+            self.register_error.content.value = dictionary['error_password_length']
+            self.register_error.open = True
+            self.register_error.update()
+            return
+        if self.register_password.value != self.register_confirm_password.value:
+            self.register_error.content.value = dictionary['error_password_confirm']
+            self.register_error.open = True
+            self.register_error.update()
+            return
+
+        new_user = User(username=self.register_username.value,
+                        email=self.register_email.controls[0].value,
+                        password=generate_password_hash(self.register_password.value,
+                                                        method='pbkdf2:sha256',
+                                                        salt_length=8)
+                        )
+        self._session.add(new_user)
+        self._session.commit()
+        self.page.client_storage.clear()
+        self.page.session.set(key='pass', value=self.register_confirm_password.value)
+        self.page.session.set(key="username", value=self.register_username.value)
+        self.page.client_storage.set(key='username', value=self.register_username.value)
+        self.page.session.set(key="email", value=self.register_email.controls[0].value)
+        self.page.client_storage.set(key='email', value=self.register_email.controls[0].value)
+        self.lock.stop_animation()
+        sleep(0.2)
+        self.page.go(f'/home')
 
     def validate(self):
         if all([self.register_username.value,

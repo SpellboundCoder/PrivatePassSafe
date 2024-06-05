@@ -25,22 +25,16 @@ from flet import (Container,
                   dropdown,
                   )
 from core import AppStyle, dict_en
-from func import generate_password
+from func import generate_password, Encryption, load_dict
 import datetime as dt
 import os
-import json
 from data.dbconfig import User, Website
 
 now = dt.datetime.now().strftime('%d-%m-%y , %I-%M %p')
 dictionary = dict_en['Add']
 
-dict_path = 'core/dict.json'
+dict_path = 'data/dict.json'
 # absolute_path = os.path.abspath(dict_path)
-
-
-def load_dict(path):
-    with open(file=path, mode='r') as file:
-        return json.load(file)
 
 
 class Add(Container):
@@ -51,9 +45,9 @@ class Add(Container):
         self.icons_path = os.path.join(os.getcwd(), 'assets/icons')
         self.icons_count = len(os.listdir(self.icons_path))
 
-        self.dict = load_dict(dict_path)['websites']
+        self.dict = load_dict(dict_path)
         self.AppStyle = AppStyle(self.page.theme_mode)
-
+        self.Encryption = Encryption(self.page.session.get('pass'))
         self.gradient = LinearGradient(**self.AppStyle.gradient())
 
         # WEBSITE
@@ -96,19 +90,22 @@ class Add(Container):
                                    weight=FontWeight.BOLD
                                    )
         self.upper_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Uppercase')
-                                   if self.page.client_storage.contains_key('Uppercase') else None
+                                   if self.page.client_storage.contains_key('Uppercase') else None,
+                                   on_change=lambda e: self.upper(e)
                                    )
         self.numbers_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Numbers')
-                                     if self.page.client_storage.contains_key('Numbers') else None
+                                     if self.page.client_storage.contains_key('Numbers') else None,
+                                     on_change=lambda e: self.numbers(e)
                                      )
         self.symbols_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Symbols')
-                                     if self.page.client_storage.contains_key('Symbols') else None
+                                     if self.page.client_storage.contains_key('Symbols') else None,
+                                     on_change=lambda e: self.symbols(e)
                                      )
         self.lower_switch = Switch(disabled=True, value=True)
 
         # validate error
         self.validate_error = SnackBar(
-            Text(dictionary['error'], color=colors.WHITE),
+            Text(color=colors.WHITE),
             bgcolor=colors.RED_ACCENT_700)
 
         # TAGS
@@ -190,28 +187,43 @@ class Add(Container):
             scroll=ScrollMode.HIDDEN)
 
     def submit(self):
-        if all([self.website.value, self.email.value, self.username.value, self.password_textfield.value]):
-            user = self.db_session.query(User).filter_by(email=self.page.session.get('email')).one_or_none()
-            new_website = Website(
-                website=self.website.value,
-                icon=self.icon.src,
-                tag=self.dd_tags.value,
-                email=self.email.value,
-                username=self.username.value,
-                mobile=self.mobile.value,
-                password=self.password_textfield.value,
-                date=now
-            )
-            user.websites.append(new_website)
-            self.db_session.commit()
-            self.page.go('/home')
-        else:
+        if not all([self.website.value, self.email.value, self.password_textfield.value]):
+            self.validate_error.content.value = dictionary['error_value']
             self.validate_error.open = True
             self.validate_error.update()
+            return
+
+        if not "@" and ".com" in self.email.value:
+            self.validate_error.content.value = dictionary['error_email']
+            self.validate_error.open = True
+            self.validate_error.update()
+            return
+
+        if len(self.password_textfield.value) < 8:
+            self.validate_error.content.value = dictionary['error_password']
+            self.validate_error.open = True
+            self.validate_error.update()
+            return
+
+        user = self.db_session.query(User).filter_by(email=self.page.session.get('email')).one_or_none()
+        new_website = Website(
+            website=self.website.value,
+            icon=self.icon.src,
+            tag=self.dd_tags.value,
+            email=self.Encryption.encrypt_data(self.email.value),
+            username=self.Encryption.encrypt_data(self.username.value) if self.username.value else None,
+            mobile=self.Encryption.encrypt_data(self.mobile.value) if self.mobile.value else None,
+            password=self.Encryption.encrypt_data(self.password_textfield.value),
+            date=now
+        )
+        user.websites.append(new_website)
+        self.db_session.commit()
+        self.page.go('/home')
 
     def update_length(self, e: ControlEvent):
         self.password_length = int(e.control.value)
         self.password_label.value = f"Password length: {self.password_length}"
+        self.page.client_storage.set('Pass_length', int(e.control.value))
         self.password_label.update()
 
     def create_password(self):
@@ -230,6 +242,15 @@ class Add(Container):
         self.icon.src = e.control.content.src
         self.website.value = e.control.data
         self.update()
+
+    def upper(self, e):
+        self.page.client_storage.set('Uppercase', e.control.value)
+
+    def numbers(self, e):
+        self.page.client_storage.set('Numbers', e.control.value)
+
+    def symbols(self, e):
+        self.page.client_storage.set('Symbols', e.control.value)
 
     def back_home(self):
         self.page.go('/home')

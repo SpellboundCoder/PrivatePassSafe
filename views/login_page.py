@@ -132,6 +132,7 @@ class Login(Container):
             if check_password_hash(user.password, password):
                 self.page.session.set(key="username", value=user.username)
                 self.page.session.set(key="email", value=user.email)
+                self.page.session.set(key="pass", value=password)
                 self.page.client_storage.set(key="username", value=user.username)
                 self.page.client_storage.set(key="email", value=user.email)
                 self.lock.stop_animation()

@@ -1,5 +1,3 @@
-import json
-
 from flet import (Page,
                   View,
                   ThemeMode,
@@ -17,12 +15,9 @@ from core import AppStyle
 from views import Login, HomePage, Register, Add, Delete, Settings, Update, Password
 from data.dbconfig import engine
 from sqlalchemy.orm import sessionmaker
-import os
-
 
 Session = sessionmaker(bind=engine)
 session = Session()
-
 
 
 class Main:

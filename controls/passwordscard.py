@@ -18,14 +18,19 @@ from flet import (Card,
                   )
 from core import AppStyle
 from typing import Iterable
+from func import Encryption
 
 
 class PasswordsCard(Card):
-    def __init__(self, height: int, websites: Iterable, func, theme_mode: Page.theme_mode):
+    def __init__(self, height: int, websites: Iterable, func, theme_mode: Page.theme_mode, page: Page):
         super().__init__(**AppStyle(theme_mode).passwords_card())
         self.height = height * 0.7
+        self.page = page
+
         self.clip_behavior = ClipBehavior.HARD_EDGE
         self.AppStyle = AppStyle(theme_mode)
+        self.Encryption = Encryption(self.page.session.get('pass'))
+
         self.containers = [
             Container(Stack([
                 Row([
@@ -46,22 +51,30 @@ class PasswordsCard(Card):
                     ]),
                     Row([
                         Icon(name=icons.ACCOUNT_CIRCLE, size=30),
-                        TextField(**self.AppStyle.read_only(), value=website.username, label='Username'),
+                        TextField(**self.AppStyle.read_only(),
+                                  value=self.Encryption.decrypt_data(website.username) if website.username else "",
+                                  label='Username'),
                         IconButton(**self.AppStyle.icon_copy()),
                     ]),
                     Row([
                         Icon(name=icons.EMAIL, size=30),
-                        TextField(**self.AppStyle.read_only(), value=website.email, label='Email'),
+                        TextField(**self.AppStyle.read_only(),
+                                  value=self.Encryption.decrypt_data(website.email),
+                                  label='Email'),
                         IconButton(**self.AppStyle.icon_copy()),
                     ]),
                     Row([
                         Icon(name=icons.PASSWORD, size=30),
-                        TextField(**self.AppStyle.read_only(), value=website.password, label='Password'),
+                        TextField(**self.AppStyle.read_only(),
+                                  value=self.Encryption.decrypt_data(website.password),
+                                  label='Password'),
                         IconButton(**self.AppStyle.icon_copy())
                     ]),
                     Row([
                         Icon(name=icons.PHONE, size=30),
-                        TextField(**self.AppStyle.read_only(), value=website.mobile, label='Mobile'),
+                        TextField(**self.AppStyle.read_only(),
+                                  value=self.Encryption.decrypt_data(website.mobile) if website.mobile else "",
+                                  label='Mobile'),
                         IconButton(**self.AppStyle.icon_copy())
                     ]),
                     Row([

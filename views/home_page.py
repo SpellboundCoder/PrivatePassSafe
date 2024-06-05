@@ -17,6 +17,7 @@ class HomePage(Container):
         super().__init__(expand=True, padding=10)
         self.page = home_page
         self.db_session = session
+
         self.AppStyle = AppStyle(self.page.theme_mode)
         self.user = session.query(User).filter_by(email=self.page.session.get('email')).one_or_none()
         self.websites = self.user.websites
@@ -29,7 +30,8 @@ class HomePage(Container):
         self.card = PasswordsCard(self.page.height,
                                   self.websites,
                                   lambda e: self.favourite_selected(e),
-                                  self.page.theme_mode)
+                                  self.page.theme_mode,
+                                  self.page)
         self.content = Column(
             controls=[
                 Text(**self.AppStyle.logo()),

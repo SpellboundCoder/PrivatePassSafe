@@ -11,13 +11,12 @@ from flet import (Container,
                   ControlEvent,
                   FontWeight,
                   ScrollMode,
-Theme,
-ExpansionTileTheme,
                   icons,
                   colors)
 from core import AppStyle
 from controls import UserSearchBar
 from data.dbconfig import User
+from func import Encryption
 
 
 class Delete(Container):
@@ -26,14 +25,14 @@ class Delete(Container):
         self.page = delete_page
         self.db_session = session
         self.AppStyle = AppStyle(self.page.theme_mode)
+        self.Encryption = Encryption(self.page.session.get('pass'))
+        self.search_bar = UserSearchBar(lambda e: self.filter_panel(e), self.page.theme_mode)
+        self.gradient = LinearGradient(**self.AppStyle.gradient())
+        self.panels = ExpansionPanelList(**self.AppStyle.expansion_panel())
 
+        # DATA
         self.user = session.query(User).filter_by(email=self.page.session.get('email')).one_or_none()
         self.websites = self.user.websites
-        self.search_bar = UserSearchBar(lambda e: self.filter_panel(e), self.page.theme_mode)
-
-        self.gradient = LinearGradient(**self.AppStyle.gradient())
-
-        self.panels = ExpansionPanelList(**self.AppStyle.expansion_panel())
 
         for website in self.websites:
             exp = ExpansionPanel(
@@ -44,8 +43,8 @@ class Delete(Container):
 
             )
             exp.content = ListTile(
-                title=Text(f"Email: {website.email}"),
-                subtitle=Text(f"Password {website.password}"),
+                title=Text(f"Email: {self.Encryption.decrypt_data(website.email)}"),
+                subtitle=Text(f"Password {self.Encryption.decrypt_data(website.password)}"),
                 trailing=IconButton(icons.DELETE, on_click=lambda e: self.handle_delete(e), data=exp,
                                     icon_color=colors.RED_ACCENT_700),
             )

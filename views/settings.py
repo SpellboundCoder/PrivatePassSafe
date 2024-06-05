@@ -3,19 +3,9 @@ import shutil
 from flet import *
 from core import AppStyle
 from controls import EmailRow
-import json
+from func import load_dict, save_dict
 
-dict_path = 'core/dict.json'
-
-
-def load_dict(path):
-    with open(file=path, mode='r') as file:
-        return json.load(file)
-
-
-def save_dict(dictionary, path):
-    with open(file=path, mode='w') as file:
-        json.dump(dictionary, file)
+dict_path = 'data/dict.json'
 
 
 class Settings(Container):
@@ -50,37 +40,18 @@ class Settings(Container):
 
         # UPLOAD
         self.file_picker = FilePicker(on_result=self.pick_files_result)
-        self.logo_img = Image(width=45, height=45, src='assets/icons/icon0.png')
+        self.logo_img = Image(width=40, height=40, src='assets/icons/icon0.png')
         self.upload_label = Text(value="Upload website's logo and enter the name: ",
                                  size=18, weight=FontWeight.BOLD)
-        self.upload_textfield = TextField(**self.AppStyle.input_textfield())
+        self.upload_textfield = TextField(**self.AppStyle.input_textfield(), hint_text='Website...', label='Website')
         self.upload_icon = IconButton(icon=icons.UPLOAD,
                                       on_click=lambda _: self.file_picker.pick_files(
                                               allowed_extensions=['png'],
                                               file_type=FilePickerFileType.IMAGE
                                       ))
-        self.upload_button = ElevatedButton(**self.AppStyle.add_button(), width=35,
+        self.upload_button = ElevatedButton(**self.AppStyle.add_button(), width=25,
                                             on_click=lambda _: self.add_website())
         self.page.overlay.append(self.file_picker)
-
-        # PASSWORD GENERATOR
-        self.password_section = Text(value='Choose your preferred options for password generator : ',
-                                     size=18, weight=FontWeight.BOLD)
-        self.upper_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Uppercase')
-                                   if self.page.client_storage.contains_key('Uppercase') else None,
-                                   on_change=lambda e: self.upper(e))
-        self.numbers_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Numbers')
-                                     if self.page.client_storage.contains_key('Numbers') else None,
-                                     on_change=lambda e: self.numbers(e))
-        self.symbols_switch = Switch(**self.AppStyle.switch(), value=self.page.client_storage.get('Symbols')
-                                     if self.page.client_storage.contains_key('Symbols') else None,
-                                     on_change=lambda e: self.symbols(e))
-        self.slider = Slider(value=self.page.client_storage.get('Pass_length')
-                             if self.page.client_storage.contains_key('Pass_length') else 8,
-                             on_change=self.update_length,
-                             **self.AppStyle.slider())
-        self.password_length = int(self.slider.value)
-        self.password_label = Text(f"Password length: {self.password_length}", size=18)
 
         # EMAIL
         self.emails = self.page.client_storage.get('emails_list') \
@@ -114,31 +85,17 @@ class Settings(Container):
             Row([self.username, self.email]),
             Row([self.upload_label]),
             Row([self.logo_img, self.upload_icon, self.upload_textfield, self.upload_button]),
+            Divider(height=5, color=colors.BLACK),
             Row([self.email_section], alignment=MainAxisAlignment.START),
             Row([self.d], alignment=MainAxisAlignment.CENTER),
             self.email_textbox,
             Row([self.delete, self.add], alignment=MainAxisAlignment.CENTER),
             Divider(height=5, color=colors.BLACK),
-            ResponsiveRow([self.password_section], alignment=MainAxisAlignment.START),
-            Row([self.password_label, self.slider]),
-            Row(height=40, controls=[
-                Text('Uppercase(A-Z)', size=18),
-                self.upper_switch],
-                alignment=MainAxisAlignment.SPACE_BETWEEN,
-                ),
-            Row(height=40, controls=[
-                Text('Numbers(123...)', size=18),
-                self.numbers_switch,
-            ], alignment=MainAxisAlignment.SPACE_BETWEEN, ),
-            Row(height=40, controls=[
-                Text('Random Symbols($&*...)', size=18),
-                self.symbols_switch,
-            ], alignment=MainAxisAlignment.SPACE_BETWEEN),
-            Divider(height=5, color=colors.BLACK),
             Row(height=50, controls=[
                 Text('Chose a Theme Mode: ', size=18, weight=FontWeight.BOLD),
                 Container(Row([self.dark_mode_icon, self.light_mode_icon], spacing=0))
             ], alignment=MainAxisAlignment.SPACE_BETWEEN),
+            Divider(height=5, color=colors.BLACK),
             Row(height=50, controls=[
                 Text('Logout: ', size=18, weight=FontWeight.BOLD),
                 self.log_out_icon
@@ -150,12 +107,12 @@ class Settings(Container):
         icons_path = os.path.join(os.getcwd(), 'assets/icons')
         icons_count = len(os.listdir(icons_path))
         for x in e.files:
-            shutil.copy(x.path, icons_path)
-            current_file_path = os.path.join(icons_path, x.name)
-            new_name = f'icon{icons_count}.png'
-            new_file_path = os.path.join(icons_path, new_name)
-            os.rename(current_file_path, new_file_path)
-            self.logo_img.src = f'assets/icons/{new_name}'
+            # shutil.copy(x.path, icons_path)
+            # current_file_path = os.path.join(icons_path, x.name)
+            # new_name = f'icon{icons_count}.png'
+            # new_file_path = os.path.join(icons_path, new_name)
+            # os.rename(current_file_path, new_file_path)
+            self.logo_img.src = x.path                   # f'assets/icons/{new_name}'
             self.page.update()
 
     def find_option(self, option_name):
@@ -206,8 +163,17 @@ class Settings(Container):
     def add_website(self):
         icons_path = os.path.join(os.getcwd(), 'assets/icons')
         icons_count = len(os.listdir(icons_path))
-        self.dict[f'icon{icons_count}.png'] = self.upload_textfield.value
+        for x in self.file_picker.result.files:
+            shutil.copy(x.path, icons_path)
+            current_file_path = os.path.join(icons_path, x.name)
+            new_name = f'icon{icons_count}.png'
+            new_file_path = os.path.join(icons_path, new_name)
+            os.rename(current_file_path, new_file_path)
+        self.dict[f'icon{icons_count}'] = self.upload_textfield.value
         save_dict(self.dict, dict_path)
+        self.logo_img.src = 'assets/icons/icon0.png'
+        self.upload_textfield.value = ''                  # f'assets/icons/{new_name}'
+        self.page.update()
 
     def delete_clicked(self):
         option = self.find_option(self.d.value)
@@ -217,21 +183,6 @@ class Settings(Container):
             self.page.client_storage.set("emails_list", self.emails)
             # d.value = None
             self.page.update()
-
-    def update_length(self, e: ControlEvent):
-        self.password_length = int(e.control.value)
-        self.password_label.value = f"Password length: {self.password_length}"
-        self.page.client_storage.set('Pass_length', int(e.control.value))
-        self.password_label.update()
-
-    def upper(self, e):
-        self.page.client_storage.set('Uppercase', e.control.value)
-
-    def numbers(self, e):
-        self.page.client_storage.set('Numbers', e.control.value)
-
-    def symbols(self, e):
-        self.page.client_storage.set('Symbols', e.control.value)
 
     def on_focus(self):
         pass

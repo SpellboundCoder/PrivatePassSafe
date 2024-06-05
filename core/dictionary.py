@@ -8,7 +8,10 @@ dict_en: dict[str, dict[str, str]] = {
         'password': 'Password',
         'confirm_password': 'Confirm Password',
         'button': 'Register',
-        'error': 'Password and Confirmed password are not match!'
+        'error_user': "User with this email already registered, please Login!",
+        'error_password_confirm': 'Password and Confirmed password are not match!',
+        'error_email': 'Please provide correct email.',
+        'error_password_length': "Password shouldn't be less than 8 characters",
     },
     # Login
     'Login': {
@@ -19,7 +22,9 @@ dict_en: dict[str, dict[str, str]] = {
         'error': 'Username or Password is incorrect!',
     },
     'Add': {
-        'error': 'Please Fill the important field e.g Website, Email, Password...'
+        'error_value': 'Please Fill the important field e.g Website, Email, Password...',
+        'error_password': "Password shouldn't be less than 8 characters",
+        'error_email': 'Please provide correct email.'
     },
     'Search': {
         'error': "Couldn't recognize your voice command. Please try again."

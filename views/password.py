@@ -142,6 +142,7 @@ class Password(Container):
             self.lock.stop_animation()
             self.page.session.set(key="username", value=user.username)
             self.page.session.set(key="email", value=user.email)
+            self.page.session.set(key="pass", value=password)
             sleep(0.5)
             self.page.go('/home')
         else:
