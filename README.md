@@ -30,6 +30,7 @@ Developed using Flet(build multi-platform apps in Python powered by Flutter) it 
 
 - **Security**: Robust encryption and secure authentication mechanisms ensure user data remains safe.
 - **Usability**: User-friendly interface and features like categorization and search make managing passwords easy.
+- **Multi-platform**: Flet allows to create an APP from your Python code for IOS, Android, Linux or Windows platform.
 
 ### Conclusion
 
