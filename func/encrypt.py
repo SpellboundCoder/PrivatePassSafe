@@ -25,13 +25,6 @@ class Encryption:
             load_dotenv(env_file_path)
         salt = os.getenv('SALT')
         return salt.encode()
-        # if salt is not None:
-        #     return salt.encode()
-        # else:
-        #     with open('.env', 'a') as file:
-        #         file.write(f"SALT={os.urandom(16)}")
-        #         new_salt = os.getenv('SALT')
-        #         return new_salt.encode()
 
     def get_key(self):
 

@@ -126,13 +126,13 @@ class Login(Container):
 
     def login_auth(self):
         email = self.login_email.controls[0].value
-        password = hash_password(self.login_password.value)
+        hashed_password = hash_password(self.login_password.value)
         user = self.session.query(User).filter_by(email=email).one_or_none()
         if user:
-            if compare_hashes(user.password, password):
+            if compare_hashes(user.password, hashed_password):
                 self.page.session.set(key="username", value=user.username)
                 self.page.session.set(key="email", value=user.email)
-                self.page.session.set(key="pass", value=password)
+                self.page.session.set(key="pass", value=self.login_password.value)
                 self.page.client_storage.set(key="username", value=user.username)
                 self.page.client_storage.set(key="email", value=user.email)
                 self.lock.stop_animation()

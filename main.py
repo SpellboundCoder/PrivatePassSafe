@@ -27,7 +27,7 @@ class Main:
         super().__init__()
         self.page = main_page
         self.page.adaptive = True
-        self.page.title = "Yevhen's Password-Manager"
+        self.page.title = "PrivatePassSafe"
         self.page.expand = True
         self.page.window.width = 600
         self.page.window.height = 800
@@ -36,7 +36,7 @@ class Main:
                 self.page.theme_mode = ThemeMode.DARK
             else:
                 self.page.theme_mode = ThemeMode.LIGHT
-        self.page.window_resizable = True
+        self.page.window.resizable = True
         self.page.padding = padding.all(0)
         self.page.horizontal_alignment = CrossAxisAlignment.CENTER
         self.page.vertical_alignment = MainAxisAlignment.CENTER
