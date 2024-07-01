@@ -11,7 +11,8 @@ Developed using Flet(build multi-platform apps in Python powered by Flutter) it 
 - **Encryption**: All passwords are encrypted using AES (Advanced Encryption Standard) before storage to ensure maximum security.
 - **Password Generation**: Built-in password generator to create strong, random passwords.
 - **User Interface**: Intuitive and responsive design created with Flet's component-based approach.
-- ![image](https://github.com/SpellboundCoder/PrivatePassSafe/assets/161624068/99dcf32e-82fb-4950-9357-fbac8f64ba65)
+- ![photo_2024-07-01_20-51-07](https://github.com/SpellboundCoder/PrivatePassSafe/assets/161624068/9e679150-2c1b-4942-96e4-6fe01a3d25eb)
+
 
 ### Technology Stack
 
