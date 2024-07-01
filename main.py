@@ -1,15 +1,17 @@
-from flet import (Page,
-                  View,
-                  ThemeMode,
-                  CrossAxisAlignment,
-                  MainAxisAlignment,
-                  Theme,
-                  ScrollbarTheme,
-                  FloatingActionButton,
-                  FloatingActionButtonLocation,
-                  AppBar,
-                  padding,
-                  app)
+from flet import (
+    Page,
+    View,
+    ThemeMode,
+    CrossAxisAlignment,
+    MainAxisAlignment,
+    Theme,
+    ScrollbarTheme,
+    FloatingActionButton,
+    FloatingActionButtonLocation,
+    AppBar,
+    padding,
+    colors,
+    app)
 from controls import UserBottomAppBar
 from core import AppStyle
 from views import Login, HomePage, Register, Add, Delete, Settings, Update, Password
@@ -21,14 +23,14 @@ session = Session()
 
 
 class Main:
-
     def __init__(self, main_page: Page):
         super().__init__()
         self.page = main_page
         self.page.adaptive = True
         self.page.title = "Yevhen's Password-Manager"
         self.page.expand = True
-        self.page.window_width = 500
+        self.page.window.width = 600
+        self.page.window.height = 800
         if self.page.client_storage.contains_key("theme"):
             if self.page.client_storage.get('theme') == 'DARK':
                 self.page.theme_mode = ThemeMode.DARK
@@ -39,7 +41,7 @@ class Main:
         self.page.horizontal_alignment = CrossAxisAlignment.CENTER
         self.page.vertical_alignment = MainAxisAlignment.CENTER
         self.page.theme = Theme(
-            scrollbar_theme=ScrollbarTheme(thickness=0),
+            scrollbar_theme=ScrollbarTheme(thickness=2),
             )
         self.helper()
 
@@ -64,7 +66,7 @@ class Main:
             '/add': Add,
             '/delete': Delete,
             '/update': Update,
-            '/settings': Settings           # f'{self.page.session.get('logged_in')}/dashboard': Dashboard,
+            '/settings': Settings
         }[self.page.route](self.page, session)
         self.page.views.clear()
 
@@ -82,11 +84,10 @@ class Main:
                 View(
                     route=route,
                     controls=[route_page],
-                    # bottom_appbar=UserBottomAppBar(route),
                     padding=0,
                     appbar=AppBar(
                         toolbar_height=10,
-                        bgcolor='black'
+                        bgcolor=colors.BLACK
                     )
                 )
             )
@@ -106,5 +107,4 @@ class Main:
             self.page.update()
 
 
-if __name__ == '__main__':
-    app(target=Main, assets_dir='assets', upload_dir="assets/icons")  # , view=AppView.WEB_BROWSER, port=5050
+app(target=Main, assets_dir='assets', upload_dir="assets/icons")

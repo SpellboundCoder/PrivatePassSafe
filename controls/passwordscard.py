@@ -19,6 +19,7 @@ from flet import (Card,
 from core import AppStyle
 from typing import Iterable
 from func import Encryption
+import pyclip
 
 
 class PasswordsCard(Card):
@@ -54,28 +55,32 @@ class PasswordsCard(Card):
                         TextField(**self.AppStyle.read_only(),
                                   value=self.Encryption.decrypt_data(website.username) if website.username else "",
                                   label='Username'),
-                        IconButton(**self.AppStyle.icon_copy()),
+                        IconButton(**self.AppStyle.icon_copy(),
+                                   on_click=lambda e: self.save_to_clipboard(e)),
                     ]),
                     Row([
                         Icon(name=icons.EMAIL, size=30),
                         TextField(**self.AppStyle.read_only(),
                                   value=self.Encryption.decrypt_data(website.email),
                                   label='Email'),
-                        IconButton(**self.AppStyle.icon_copy()),
+                        IconButton(**self.AppStyle.icon_copy(),
+                                   on_click=lambda e: self.save_to_clipboard(e)),
                     ]),
                     Row([
                         Icon(name=icons.PASSWORD, size=30),
                         TextField(**self.AppStyle.read_only(),
                                   value=self.Encryption.decrypt_data(website.password),
                                   label='Password'),
-                        IconButton(**self.AppStyle.icon_copy())
+                        IconButton(**self.AppStyle.icon_copy(),
+                                   on_click=lambda e: self.save_to_clipboard(e))
                     ]),
                     Row([
                         Icon(name=icons.PHONE, size=30),
                         TextField(**self.AppStyle.read_only(),
                                   value=self.Encryption.decrypt_data(website.mobile) if website.mobile else "",
                                   label='Mobile'),
-                        IconButton(**self.AppStyle.icon_copy())
+                        IconButton(**self.AppStyle.icon_copy(),
+                                   on_click=lambda e: self.save_to_clipboard(e))
                     ]),
                     Row([
                         Icon(name=icons.DATE_RANGE, size=30),
@@ -118,3 +123,7 @@ class PasswordsCard(Card):
             e.control.content.controls[1].visible = False
             e.control.content.controls[0].visible = True
             e.control.update()
+
+    @staticmethod
+    def save_to_clipboard(e):
+        pyclip.copy(e.control.parent.controls[1].value)

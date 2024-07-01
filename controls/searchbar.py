@@ -1,18 +1,22 @@
-from flet import (Container,
-                  IconButton,
-                  Icon,
-                  Column,
-                  Row,
-                  TextField,
-                  Text,
-                  MainAxisAlignment,
-                  SnackBar,
-                  AlertDialog,
-                  Page,
-                  colors,
-                  icons)
+from flet import (
+    Container,
+    IconButton,
+    Icon,
+    Column,
+    Row,
+    TextField,
+    Text,
+    MainAxisAlignment,
+    SnackBar,
+    AlertDialog,
+    Page,
+    AudioRecorder,
+    AudioEncoder,
+    colors,
+    icons)
 from core import dict_en, AppStyle
 import speech_recognition as sr
+from time import sleep
 
 dictionary = dict_en['Search']
 
@@ -26,8 +30,14 @@ class UserSearchBar(Container):
             bgcolor=colors.RED
         )
 
+        self.audio_file = "data/record.wav"
+
         self.dlg = AlertDialog(
            title=Text("Listening..."),
+        )
+        self.audio_rec = AudioRecorder(
+            audio_encoder=AudioEncoder.WAV,
+            cancel_echo=True
         )
 
         self.content = Column([
@@ -52,7 +62,8 @@ class UserSearchBar(Container):
                 ),
                 IconButton(icon=icons.MIC, icon_size=20,
                            on_click=lambda e: self.recognize_speech_from_microphone()),
-            ])
+            ]),
+            self.audio_rec
         ], alignment=MainAxisAlignment.CENTER)
 
     def view_search(self):
@@ -73,21 +84,23 @@ class UserSearchBar(Container):
 
     def recognize_speech_from_microphone(self):
         recognizer = sr.Recognizer()
-        microphone = sr.Microphone()
+
         self.page.dialog = self.dlg
 
-        with microphone as source:
-            recognizer.adjust_for_ambient_noise(source)
-            self.dlg.open = True
-            self.page.update()
-            audio = recognizer.listen(source)
+        self.audio_rec.start_recording(self.audio_file)
+        self.dlg.open = True
+        self.page.update()
+        sleep(3)
+        self.audio_rec.stop_recording()
+
+        with sr.AudioFile(self.audio_file) as source:
+            audio = recognizer.record(source)
 
         try:
-            recognized_text = recognizer.recognize_vosk(audio)
-            x = recognized_text.strip(' "{}').split(':')[1].replace('"', '').strip()
+            recognized_text = recognizer.recognize_google(audio)
             self.content.controls[0].visible = True
             self.content.controls[1].visible = False
-            self.content.controls[0].controls[1].value = x
+            self.content.controls[0].controls[1].value = recognized_text
             self.dlg.open = False
             self.page.update()
         except sr.UnknownValueError:

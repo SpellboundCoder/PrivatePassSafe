@@ -1,5 +1,5 @@
 flet~=0.22.0
 python-dotenv~=1.0.1
 SQLAlchemy~=2.0.29
-Werkzeug~=3.0.2
 cryptography~=42.0.7
+pyclip~=0.7.0

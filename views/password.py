@@ -15,13 +15,12 @@ from flet import (Page,
                   TextStyle,
                   TextDecoration,
                   Offset,
-Stack,
-CrossAxisAlignment,
+                  Stack,
                   icons,
                   colors,
                   ScrollMode,
                   padding)
-from werkzeug.security import check_password_hash
+from func.generate_password import compare_hashes, hash_password
 from controls import AnimatedLock
 from core import dict_en, AppStyle
 from data.dbconfig import User
@@ -81,7 +80,7 @@ class Password(Container):
                                     alignment=MainAxisAlignment.CENTER,
                                     controls=[
                                         Text(
-                                            value=f'Welcome back {self.page.client_storage.get('username')}',
+                                            value=f"Welcome back {self.page.client_storage.get('username')}",
                                             size=24,
                                             weight=FontWeight.BOLD)]
                                 ),
@@ -135,15 +134,15 @@ class Password(Container):
         )
 
     def login_auth(self):
-        password = self.password.value
+        password = hash_password(self.password.value)
         email = self.page.client_storage.get(key="email")
         user = self.session.query(User).filter_by(email=email).one_or_none()
-        if check_password_hash(user.password, password):
+        if compare_hashes(user.password, password):
             self.lock.stop_animation()
             self.page.session.set(key="username", value=user.username)
             self.page.session.set(key="email", value=user.email)
             self.page.session.set(key="pass", value=password)
-            sleep(0.5)
+            sleep(0.2)
             self.page.go('/home')
         else:
             self.password_error.open = True

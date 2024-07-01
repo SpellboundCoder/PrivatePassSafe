@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship
 
 db_url = "sqlite:///data/database.db"
 
-engine = create_engine(db_url, echo=True)
+engine = create_engine(db_url)
 
 
 class Base(DeclarativeBase):
@@ -37,8 +37,8 @@ class Website(Base):
     icon: Mapped[str] = mapped_column(String(60))
     tag: Mapped[str] = mapped_column(String(60))
     email: Mapped[str] = mapped_column(String(120))
-    username: Mapped[str] = mapped_column(String(120))
-    mobile: Mapped[str] = mapped_column(String(120))
+    username: Mapped[str] = mapped_column(String(120), nullable=True)
+    mobile: Mapped[str] = mapped_column(String(120), nullable=True)
     password: Mapped[str] = mapped_column(String(120))
     date: Mapped[str] = mapped_column(String(50))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))

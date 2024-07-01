@@ -11,7 +11,7 @@ from core import AppStyle
 class Chips(Row):
     def __init__(self, func, theme_mode: Page.theme_mode):
         super().__init__()
-        self.scroll = ScrollMode.HIDDEN
+        self.scroll = ScrollMode.AUTO
         self.spacing = 15
         self.AppStyle = AppStyle(theme_mode)
         self.tags = ['All', 'Favorite', 'Social Media', 'Entertainment', 'Messengers', 'Work', 'Study']

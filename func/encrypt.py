@@ -6,8 +6,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.fernet import Fernet
 
-load_dotenv()
-
 
 class Encryption:
     def __init__(self, password: str):
@@ -17,12 +15,23 @@ class Encryption:
 
     @staticmethod
     def get_salt() -> bytes:
-        salt = os.getenv('SALT')
-        if salt is not None:
-            return salt.encode()
+        env_file_path = '.env'
+        if os.path.exists(env_file_path):
+            load_dotenv(env_file_path)
         else:
-            with open('.env', 'a') as file:
+            with open(env_file_path, 'w') as file:
+                file.write("# .env file \n")
                 file.write(f"SALT={os.urandom(16)}")
+            load_dotenv(env_file_path)
+        salt = os.getenv('SALT')
+        return salt.encode()
+        # if salt is not None:
+        #     return salt.encode()
+        # else:
+        #     with open('.env', 'a') as file:
+        #         file.write(f"SALT={os.urandom(16)}")
+        #         new_salt = os.getenv('SALT')
+        #         return new_salt.encode()
 
     def get_key(self):
 

@@ -15,7 +15,7 @@ class Settings(Container):
         self.page = settings_page
 
         self.AppStyle = AppStyle(self.page.theme_mode)
-        self.dict = load_dict(dict_path)['websites']
+        self.dict = load_dict(dict_path)
         self.gradient = LinearGradient(**self.AppStyle.gradient())
 
         # ACCOUNT
