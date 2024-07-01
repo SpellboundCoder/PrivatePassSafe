@@ -10,17 +10,21 @@ Developed using Flet(build multi-platform apps in Python powered by Flutter) it 
 - **Password Vault**: Store and organize passwords in a user-friendly vault with search and categorization capabilities.
 - **Encryption**: All passwords are encrypted using AES (Advanced Encryption Standard) before storage to ensure maximum security.
 - **Password Generation**: Built-in password generator to create strong, random passwords.
+- ![pass_generator](https://github.com/SpellboundCoder/PrivatePassSafe/assets/161624068/83bda348-dc43-48ca-8047-1d882028871e)
 - **User Interface**: Intuitive and responsive design created with Flet's component-based approach.
 - ![photo_2024-07-01_20-51-07](https://github.com/SpellboundCoder/PrivatePassSafe/assets/161624068/9e679150-2c1b-4942-96e4-6fe01a3d25eb)
+- **Dark/Light Mode**: Two options to chose your favourite theme mode.
+- ![theme_mode](https://github.com/SpellboundCoder/PrivatePassSafe/assets/161624068/00661078-ea1a-45a5-9e07-1fffa532a30c)
+
 
 
 ### Technology Stack
 
 - **Frontend**: Flet (Python)
 - **Backend**: Flet (Python)
-- **Database**: SQLite
-- **Authentication**: using hashlib python library to create a hash of password
-- **Encryption**: using cryptography library to encrypt sensetive data 
+- **Database**: SQLALchemy and SQLite
+- **Authentication**: hashlib library to create a hash of password
+- **Encryption**: cryptography library to encrypt sensetive data 
 
 ### Benefits
 
