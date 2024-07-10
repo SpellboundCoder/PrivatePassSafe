@@ -89,3 +89,17 @@ class HomePage(Container):
             sleep(0.5)
             self.card.update()
         self.page.update()
+
+    def filter_tiles(self, e):
+        if e.data:
+            for tile in self.card.content.controls:
+                tile.visible = (
+                    True
+                    if e.data.lower() in tile.content.controls[0].controls[1].value.lower()
+                    else False
+                )
+            self.page.update()
+        else:
+            for tile in self.card.content.controls:
+                tile.visible = True
+            self.page.update()
