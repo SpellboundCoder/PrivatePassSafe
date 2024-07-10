@@ -137,14 +137,19 @@ class Password(Container):
         hashed_password = hash_password(self.password.value)
         email = self.page.client_storage.get(key="email")
         user = self.session.query(User).filter_by(email=email).one_or_none()
-        if compare_hashes(user.password, hashed_password):
-            self.lock.stop_animation()
-            self.page.session.set(key="username", value=user.username)
-            self.page.session.set(key="email", value=user.email)
-            self.page.session.set(key="pass", value=self.password.value)
-            sleep(0.2)
-            self.page.go('/home')
+        if user:
+            if compare_hashes(user.password, hashed_password):
+                self.lock.stop_animation()
+                self.page.session.set(key="username", value=user.username)
+                self.page.session.set(key="email", value=user.email)
+                self.page.session.set(key="pass", value=self.password.value)
+                sleep(0.2)
+                self.page.go('/home')
+            else:
+                self.password_error.open = True
+                self.password_error.update()
         else:
+            self.password_error.content.value = "Failed to sign-in please go to Login page."
             self.password_error.open = True
             self.password_error.update()
 
