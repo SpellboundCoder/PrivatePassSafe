@@ -21,8 +21,8 @@ Developed using Flet(build multi-platform apps in Python powered by Flutter) it 
 ### Technology Stack
 
 - **Frontend**: Flet (Python)
-- **Backend**: Flet (Python)
-- **Database**: SQLALchemy and SQLite
+- **Backend**: Pythn(python-dotenv, SQLAlchemy, cryptography , pyclip, SpeechRecognition)
+- **Database**: SQLite
 - **Authentication**: hashlib library to create a hash of password
 - **Encryption**: cryptography library to encrypt sensetive data 
 
