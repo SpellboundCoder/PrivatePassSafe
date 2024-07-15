@@ -5,7 +5,7 @@ Developed using Flet(build multi-platform apps in Python powered by Flutter) it 
 
 # Register Page
 ![register](https://github.com/user-attachments/assets/5424fa4f-c51f-478a-9a33-01a9fa768c6d)
-<img src="https://github.com/user-attachments/assets/5424fa4f-c51f-478a-9a33-01a9fa768c6d" width="450" height="850">
+<img src="https://github.com/user-attachments/assets/5424fa4f-c51f-478a-9a33-01a9fa768c6d" width="550" height="850">
 # Login Page
 ![Login](https://github.com/user-attachments/assets/9399aaf0-f60c-461a-9530-168f4f842ccb)
 
