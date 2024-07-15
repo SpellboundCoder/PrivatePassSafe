@@ -1,6 +1,6 @@
-![image](https://github.com/user-attachments/assets/f4069e0f-ed23-4d86-827a-65e38dc168b6)## PrivataPassSafe
+## PrivataPassSafe
 
-This application is a secure and efficient tool designed to store and manage users' passwords. 
+Is a secure and efficient tool designed to store and manage users' passwords. 
 Developed using Flet(build multi-platform apps in Python powered by Flutter) it provides a seamless experience across devices.
 
 # Register Page
