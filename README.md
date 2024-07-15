@@ -4,6 +4,7 @@ Is a secure and efficient tool designed to store and manage users' passwords.
 Developed using Flet(build multi-platform apps in Python powered by Flutter) it provides a seamless experience across devices.
 
 # Register Page
+replace ![register](https://github.com/user-attachments/assets/5424fa4f-c51f-478a-9a33-01a9fa768c6d) with <img src="[https://your-image-url.type](https://github.com/user-attachments/assets/5424fa4f-c51f-478a-9a33-01a9fa768c6d)" width="100" height="100">
 ![register](https://github.com/user-attachments/assets/5424fa4f-c51f-478a-9a33-01a9fa768c6d =250x250)
 
 # Login Page
