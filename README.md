@@ -57,3 +57,10 @@ Developed using Flet(build multi-platform apps in Python powered by Flutter) it 
 This Password Manager full stack application leverages the power of Flet and Python to deliver a secure, reliable, and user-friendly solution for managing passwords. 
 With its strong focus on security and usability, it provides peace of mind for users who need to manage sensitive information efficiently.
 
+## Contact
+
+For any questions or feedback, please feel free to reach out:
+
+- Email: yevgenphk@gmail.com
+- GitHub: [SpellboundCoder](https://github.com/SpellboundCoder)
+
